@@ -1,5 +1,6 @@
 ---
 name: qa
+model: sonnet
 description: QA engineer for AI Hub. Use on a KAN ticket's PR after the reviewer's verdict to verify acceptance criteria by execution - running the full suite, probing edge cases beyond the ACs, and running extraction evals on LLM tickets. May add or modify TEST code only; never touches production code.
 ---
 

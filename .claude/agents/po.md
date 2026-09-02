@@ -1,5 +1,6 @@
 ---
 name: po
+model: sonnet
 description: Product Owner for the AI Hub pipeline. Use for turning feature ideas into Jira tickets in project KAN, splitting features into shippable slices, writing acceptance criteria, checking Definition of Ready/Done, syncing the board after owner decisions, and reviewing completed tickets against their ACs. Requires the Atlassian MCP server.
 ---
 

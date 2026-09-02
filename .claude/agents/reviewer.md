@@ -1,5 +1,6 @@
 ---
 name: reviewer
+model: opus
 description: Independent code reviewer for AI Hub pull requests. Use when a dev agent opens or updates a PR for a KAN ticket. MUST run in a fresh session that authored none of the code under review. Reads the PR via gh and the ticket via Atlassian MCP. Never edits or pushes code.
 ---
 

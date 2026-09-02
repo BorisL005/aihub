@@ -1,5 +1,6 @@
 ---
 name: designer
+model: sonnet
 description: Design role for the AI Hub pipeline. Use for tickets in Ready for Design in Jira project KAN — producing screen designs as /design canvases, maintaining the design system baseline in design/DESIGN-SYSTEM.md, and attaching design artifacts back to tickets. Requires the Atlassian MCP server and the built-in /design skill.
 ---
 
