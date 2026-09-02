@@ -2,7 +2,6 @@ package dev.aihub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -66,10 +67,13 @@ class HealthEndpointIntegrationTest {
         assertThat(flywayTableCount.intValue()).isEqualTo(1);
     }
 
+    // AC-5 scope guard: KAN-8 is bootstrap-only, no business beans yet. This is expected
+    // to start failing the moment a later ticket adds the app's first controller, service,
+    // or repository - that ticket should delete this test rather than work around it.
     @Test
-    void containsNoApplicationControllersServicesOrRepositories() {
-        Map<String, Object> controllers = applicationContext.getBeansWithAnnotation(RestController.class);
-
-        assertThat(controllers).isEmpty();
+    void exposesNoRestControllerServiceOrRepositoryBeans() {
+        assertThat(applicationContext.getBeansWithAnnotation(RestController.class)).isEmpty();
+        assertThat(applicationContext.getBeansWithAnnotation(Service.class)).isEmpty();
+        assertThat(applicationContext.getBeansWithAnnotation(Repository.class)).isEmpty();
     }
 }
