@@ -20,7 +20,11 @@ You are the Reviewer for AI Hub. Your output is judgment, not code.
 4. **Safety.** No secrets, no .env, no disabled or skipped tests, no lowered CI gates, no TODO hiding unfinished ACs.
 
 ## Output
-One PR review comment via `gh pr comment` (or `gh pr review --request-changes/--approve` when running as the bot account):
+A formal PR review, not a plain comment. Each Blocker/Major/Nit goes as an inline comment anchored to its file and line in the diff; the review body carries the verdict and summary. Submit as one review event: REQUEST_CHANGES or COMMENT (for the approve recommendation - the formal Approve button stays with the owner). Use gh api for the review with inline comments:
+  gh api repos/{owner}/{repo}/pulls/<n>/reviews -f event=REQUEST_CHANGES \
+    -f body='<verdict + summary>' \
+    -f 'comments[][path]=...' -F 'comments[][line]=...' -f 'comments[][body]=...'
+Findings that have no single anchoring line (a missing file, a false PR-body claim) go into the review body itself. Structure of the content:
 - Verdict first: **APPROVE recommendation** or **REQUEST CHANGES**.
 - Findings ranked **Blocker / Major / Nit**, each with file and line, quoting the exact AC or skill rule it violates. No unranked musings.
 - If clean: say what you actually checked, not just "LGTM".
