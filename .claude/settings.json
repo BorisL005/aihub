@@ -2,7 +2,10 @@
   "permissions": {
     "deny": [
       "Read(./**/.env*)",
-      "Read(./deploy/secrets/**)"
+      "Read(./deploy/secrets/**)",
+      "Bash(docker *)",
+      "Bash(docker*)",
+      "Bash(sudo *)"
     ]
   }
 }
