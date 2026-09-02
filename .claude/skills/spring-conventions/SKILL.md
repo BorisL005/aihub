@@ -39,7 +39,7 @@ Follow the standard Oracle/Java conventions; the points below are the ones agent
 
 ## Module structure
 
-Single Gradle project, package-per-feature under `dev.aihub`:
+Single Maven project (multi-module later only if pain demands), package-per-feature under `dev.aihub`:
 
 ```
 dev.aihub

@@ -7,7 +7,7 @@ Personal tracker app (receipts, workouts, car maintenance) built by AI agents un
 - Relevant skill in `.claude/skills/` before touching its area (Java -> spring-conventions).
 
 ## Layout
-- `backend/` - Java 21, Spring Boot 4.1, jOOQ, Flyway, Spring AI 2.0 (Gradle)
+- `backend/` - Java 21, Spring Boot 4.1, jOOQ, Flyway, Spring AI 2.0 (Maven)
 - `mobile/` - Expo app (TypeScript)
 - `api/openapi.yaml` - the client-backend contract; TS client is generated from it. An endpoint not in the spec does not exist.
 - `design/` - DESIGN-SYSTEM.md (owner-set §Aesthetic direction is binding) + per-ticket canvas sources
@@ -32,6 +32,6 @@ Personal tracker app (receipts, workouts, car maintenance) built by AI agents un
 5. Human owner gates: PR approval and the production deploy environment. Never merge or deploy without them.
 
 ## Commands
-- Backend: `cd backend && ./gradlew test` (Testcontainers needs Docker running)
+- Backend: `cd backend && ./mvnw verify` (Testcontainers needs Docker running)
 - Mobile: `cd mobile && npx expo start`
 - Board: `/po-sync`; design: `/design-ticket KAN-n`; review: `/review <pr>`; QA: `/qa <pr>`
