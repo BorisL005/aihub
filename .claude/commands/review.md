@@ -1,0 +1,1 @@
+Use the reviewer agent on pull request $ARGUMENTS: verify AC truthfulness against the linked KAN ticket, conventions per the skills, scope, and safety; post the ranked verdict on the PR and a one-liner on the ticket. This session must not have authored the code - if it did, refuse.

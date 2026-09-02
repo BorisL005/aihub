@@ -1,0 +1,1 @@
+Use the po agent to run its board sync routine on Jira project KAN: process Awaiting Owner tickets with answered decisions, promote Draft tickets that now pass Definition of Ready (respecting the WIP limit and Blocks order), and report what moved, what still waits on the owner (with the exact open questions), and current WIP usage. $ARGUMENTS

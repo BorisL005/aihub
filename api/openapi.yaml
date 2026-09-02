@@ -1,0 +1,7 @@
+openapi: 3.1.0
+info:
+  title: AI Hub API
+  version: 0.0.1
+paths: {}
+# Contract-first: endpoints are added here in the same commit as their implementation.
+# The Expo TS client is generated from this file.

@@ -1,0 +1,1 @@
+Use the qa agent on pull request $ARGUMENTS: check out the branch, run the full suite, build the AC execution table from the linked KAN ticket, hunt edge cases, run evals if the ticket gates on them, and post the QA report on the PR. Test paths only.

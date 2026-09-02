@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    button { font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    a { color: oklch(0.520 0.160 252); text-decoration: none; }
+    a:hover { color: oklch(0.42 0.16 252); }
+  </style>
+</helmet>
+<div style="width: 900px; min-height: 1140px; background: oklch(0.975 0 0); padding: 40px 40px 48px; display: flex; flex-direction: column; gap: 28px;">
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.650 0 0);">AI Hub · design system baseline · established on KAN-5</div>
+    <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.024em; color: oklch(0.200 0 0);">Primitives</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid oklch(0.900 0 0);">
+  <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0);">Entry row</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px;">Fixed 64&nbsp;px, tappable across the full width, no chevron. Divider inset to the text column so the eye runs down one edge. The three slots do not move when extraction lands in KAN-6 &mdash; only their contents change: title becomes the merchant, the right slot becomes the amount, set larger and tabular because the number is what the user came for.</div>
+  <div style="margin-top: 2px;"><div style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <div style="width: 390px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 12px; overflow: hidden;">
+        <div style="padding: 6px 12px; background: oklch(0.955 0.035 75); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.520 0.110 70);">KAN-5 &mdash; not read yet</div>
+        <div style="display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 16px; background: transparent; box-shadow: none; cursor: pointer;">
+      <div style="width: 40px; height: 40px; border-radius: 6px; background: oklch(0.945 0 0); border: 1px solid oklch(0.900 0 0); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+      <div style="width: 18px; height: 26px; background: #ffffff; transform: rotate(-3deg); display: flex; flex-direction: column; gap: 3px; padding: 4px;">
+        <div style="height: 2px; background: oklch(0.900 0 0); width: 70%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 100%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 100%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 88%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 100%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 52%;"></div>
+      </div>
+    </div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+        <div style="font-size: 16px; font-weight: 600; color: oklch(0.200 0 0); letter-spacing: -0.008em;">Receipt</div>
+        <div style="font-size: 13px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">Today, 14:32</div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: flex-end; min-width: 88px; flex-shrink: 0;"><span style="display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; background: oklch(0.955 0.035 75); color: oklch(0.520 0.110 70); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;">Not read yet</span></div>
+    </div>
+      </div>
+      <div style="width: 390px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 12px; overflow: hidden;">
+        <div style="padding: 6px 12px; background: oklch(0.955 0.030 150); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.500 0.130 150);">KAN-6 &mdash; same geometry, read</div>
+        <div style="display: flex; align-items: center; gap: 12px; height: 64px; padding: 0 16px; background: transparent; box-shadow: none; cursor: pointer;">
+      <div style="width: 40px; height: 40px; border-radius: 6px; background: oklch(0.945 0 0); border: 1px solid oklch(0.900 0 0); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+      <div style="width: 18px; height: 26px; background: #ffffff; transform: rotate(-3deg); display: flex; flex-direction: column; gap: 3px; padding: 4px;">
+        <div style="height: 2px; background: oklch(0.900 0 0); width: 70%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 100%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 100%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 88%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 100%;"></div><div style="height: 2px; background: oklch(0.900 0 0); width: 52%;"></div>
+      </div>
+    </div>
+      <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+        <div style="font-size: 16px; font-weight: 600; color: oklch(0.200 0 0); letter-spacing: -0.008em;">Biedronka</div>
+        <div style="font-size: 13px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">Today, 14:32</div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: flex-end; min-width: 88px; flex-shrink: 0;"><span style="font-size: 19px; font-weight: 600; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">89.40</span></div>
+    </div>
+      </div>
+    </div></div>
+</div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid oklch(0.900 0 0);">
+  <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0);">Status badge</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px;">Small, text-labeled, consistent. Control radius &mdash; not a pill, because a pill would be a third corner radius. Maps from the receipt&#39;s stored status; the internal name is never shown. Read normally hides the badge in favour of the amount.</div>
+  <div style="margin-top: 2px;"><div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <span style="display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; background: oklch(0.955 0.035 75); color: oklch(0.520 0.110 70); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;">Not read yet</span><span style="display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; background: oklch(0.955 0.028 27); color: oklch(0.520 0.160 27); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;">Needs a check</span><span style="display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; background: oklch(0.955 0.030 150); color: oklch(0.500 0.130 150); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;">Read</span>
+      <span style="font-size: 11px; color: oklch(0.650 0 0);">pending &middot; needs_review &middot; extracted</span>
+    </div></div>
+</div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid oklch(0.900 0 0);">
+  <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0);">Buttons</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px;">The primary button is ink, not accent. Hierarchy is contrast and weight; the accent is spent on meaning &mdash; interactive text and progress &mdash; not on shouting. Never two primaries on one screen.</div>
+  <div style="margin-top: 2px;"><div style="display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;">
+      <div style="width: 220px;"><button style="width: 100%; height: 48px; border: none; border-radius: 6px; background: oklch(0.200 0 0); color: #ffffff; font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.008em; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7a1 1 0 0 0 .84-.46l.92-1.42A1 1 0 0 1 9.8 3.7h4.4a1 1 0 0 1 .84.42l.92 1.42A1 1 0 0 0 16.8 6h1.7A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5Z"/><circle cx="12" cy="12.5" r="3.6"/></svg>Capture receipt</button></div>
+      <div style="width: 180px;"><button style="width: 100%; height: 48px; border: 1px solid oklch(0.800 0 0); border-radius: 6px; background: #ffffff; color: oklch(0.200 0 0); font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.008em; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(0.200 0 0)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-1.2 5.4"/><path d="M20 4.5V11h-6.4"/></svg>Retake</button></div>
+      <div style="width: 170px;"><button style="width: 100%; height: 44px; border: none; border-radius: 6px; background: transparent; color: oklch(0.500 0 0); font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.006em; cursor: pointer;">Back to receipts</button></div>
+      <div style="width: 130px;"><button style="width: 100%; height: 44px; border: none; border-radius: 6px; background: transparent; color: oklch(0.520 0.160 27); font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.006em; cursor: pointer;">Discard</button></div>
+      <div style="width: 220px; opacity: 0.35;"><button style="width: 100%; height: 48px; border: none; border-radius: 6px; background: oklch(0.200 0 0); color: #ffffff; font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: -0.008em; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7a1 1 0 0 0 .84-.46l.92-1.42A1 1 0 0 1 9.8 3.7h4.4a1 1 0 0 1 .84.42l.92 1.42A1 1 0 0 0 16.8 6h1.7A2.5 2.5 0 0 1 21 8.5v8A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5Z"/><circle cx="12" cy="12.5" r="3.6"/></svg>Capture receipt</button></div>
+    </div>
+    <div style="font-size: 10px; color: oklch(0.650 0 0); margin-top: 8px;">primary 48 &middot; secondary 48 &middot; quiet 44 &middot; quiet-danger 44 &middot; disabled (35% opacity)</div></div>
+</div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid oklch(0.900 0 0);">
+  <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0);">Progress</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px;">One determinate bar, 6&nbsp;px, the one place the accent fills a shape &mdash; it reports state, so it earns the colour. It only ever moves forward: getting ready 0&ndash;10%, sending the photo 10&ndash;95%, finishing 95&ndash;100%. It must not reset or restart between those.</div>
+  <div style="margin-top: 2px;"><div style="display: flex; flex-direction: column; gap: 12px; width: 420px;">
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="flex-grow: 1; height: 6px; border-radius: 6px; background: oklch(0.945 0 0); overflow: hidden;"><div style="width: 8%; height: 100%; border-radius: 6px; background: oklch(0.520 0.160 252);"></div></div><span style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0); width: 40px; text-align: right; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">8%</span></div><div style="display: flex; align-items: center; gap: 12px;"><div style="flex-grow: 1; height: 6px; border-radius: 6px; background: oklch(0.945 0 0); overflow: hidden;"><div style="width: 64%; height: 100%; border-radius: 6px; background: oklch(0.520 0.160 252);"></div></div><span style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0); width: 40px; text-align: right; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">64%</span></div><div style="display: flex; align-items: center; gap: 12px;"><div style="flex-grow: 1; height: 6px; border-radius: 6px; background: oklch(0.945 0 0); overflow: hidden;"><div style="width: 97%; height: 100%; border-radius: 6px; background: oklch(0.520 0.160 252);"></div></div><span style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0); width: 40px; text-align: right; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">97%</span></div>
+    </div></div>
+</div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid oklch(0.900 0 0);">
+  <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0);">Message banner</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px;">Sits inside the bottom sheet above the action buttons, so cause and fix read together. Flat tint, no border, no shadow. Danger for something that failed, warn for something the user must change.</div>
+  <div style="margin-top: 2px;"><div style="display: flex; gap: 18px; flex-wrap: wrap;">
+      <div style="width: 350px;"><div style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: oklch(0.955 0.028 27);">
+      <div style="flex-shrink: 0; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(0.520 0.160 27)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5 21 19.5H3Z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.7" fill="oklch(0.520 0.160 27)" stroke="none"/></svg></div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 15px; font-weight: 600; color: oklch(0.520 0.160 27); letter-spacing: -0.006em;">Couldn&#39;t save that receipt</div>
+        <div style="font-size: 14px; line-height: 20px; color: oklch(0.200 0 0);">Your photo is still here. Check your connection and try again.</div>
+      </div>
+    </div></div>
+      <div style="width: 350px;"><div style="display: flex; gap: 10px; padding: 12px 14px; border-radius: 12px; background: oklch(0.955 0.035 75);">
+      <div style="flex-shrink: 0; padding-top: 2px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="oklch(0.520 0.110 70)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5 21 19.5H3Z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.7" fill="oklch(0.520 0.110 70)" stroke="none"/></svg></div>
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <div style="font-size: 15px; font-weight: 600; color: oklch(0.520 0.110 70); letter-spacing: -0.006em;">This photo won&#39;t work</div>
+        <div style="font-size: 14px; line-height: 20px; color: oklch(0.200 0 0);">It&#39;s too big or in a format we can&#39;t read.</div>
+      </div>
+    </div></div>
+    </div></div>
+</div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 24px; border-bottom: 1px solid oklch(0.900 0 0);">
+  <div style="font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0);">Voice</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px;">Short, plain, second person. Say what happened and what to do. Never name the machinery.</div>
+  <div style="margin-top: 2px;"><div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 18px; max-width: 780px;">
+      <div style="display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 6px;">
+          <div style="font-size: 15px; font-weight: 600; color: oklch(0.200 0 0);">Not read yet</div>
+          <div style="font-size: 10px; letter-spacing: 0.03em; color: oklch(0.650 0 0);">no fields read yet</div>
+        </div><div style="display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 6px;">
+          <div style="font-size: 15px; font-weight: 600; color: oklch(0.200 0 0);">Saving your receipt</div>
+          <div style="font-size: 10px; letter-spacing: 0.03em; color: oklch(0.650 0 0);">save in flight</div>
+        </div><div style="display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 6px;">
+          <div style="font-size: 15px; font-weight: 600; color: oklch(0.200 0 0);">Receipt saved</div>
+          <div style="font-size: 10px; letter-spacing: 0.03em; color: oklch(0.650 0 0);">receipt stored</div>
+        </div><div style="display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 6px;">
+          <div style="font-size: 15px; font-weight: 600; color: oklch(0.200 0 0);">Couldn&#39;t save that receipt</div>
+          <div style="font-size: 10px; letter-spacing: 0.03em; color: oklch(0.650 0 0);">save or claim failed</div>
+        </div><div style="display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 6px;">
+          <div style="font-size: 15px; font-weight: 600; color: oklch(0.200 0 0);">This photo won&#39;t work</div>
+          <div style="font-size: 10px; letter-spacing: 0.03em; color: oklch(0.650 0 0);">rejected before sending</div>
+        </div><div style="display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; background: #ffffff; border: 1px solid oklch(0.900 0 0); border-radius: 6px;">
+          <div style="font-size: 15px; font-weight: 600; color: oklch(0.200 0 0);">Needs a check</div>
+          <div style="font-size: 10px; letter-spacing: 0.03em; color: oklch(0.650 0 0);">needs_review</div>
+        </div>
+    </div></div>
+</div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":900,"height":1140}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+    * { box-sizing: border-box; }
+    button { font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+    a { color: oklch(0.520 0.160 252); text-decoration: none; }
+    a:hover { color: oklch(0.42 0.16 252); }
+  </style>
+</helmet>
+<div style="width: 900px; min-height: 1040px; background: oklch(0.975 0 0); padding: 40px 40px 48px; display: flex; flex-direction: column; gap: 36px;">
+  <div style="display: flex; flex-direction: column; gap: 4px;">
+    <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.650 0 0);">AI Hub · design system baseline · established on KAN-5</div>
+    <div style="font-size: 32px; font-weight: 700; letter-spacing: -0.024em; color: oklch(0.200 0 0);">Foundations</div>
+    <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 660px; margin-top: 4px;">Every value below is derived from the owner-set aesthetic direction: dense, calm, utilitarian, confident, quiet. Typography does hierarchy; colour does meaning; decoration does nothing.</div>
+  </div>
+
+  <div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.650 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">01</div>
+  <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.018em; color: oklch(0.200 0 0);">Colour</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 640px;">Neutral base at zero chroma, one accent, three semantic status hues. Nothing else. The accent is not a brand flourish &mdash; it marks interactive text and progress only.</div>
+</div>
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px;">
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.975 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Background</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--bg</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: #ffffff; border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Surface</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--surface</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.945 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Sunk</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--sunk</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.900 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Line</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--line</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.800 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Line strong</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--line-strong</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.160 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Chrome</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--chrome</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.200 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Ink</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--ink</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.500 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Ink muted</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--ink-muted</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.650 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Ink faint</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--ink-faint</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.240 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Chrome raised</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--chrome-raised</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.970 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">On dark</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--on-dark</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.720 0 0); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">On dark muted</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--on-dark-muted</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.520 0.160 252); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Accent</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--accent</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.960 0.025 252); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Accent tint</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--accent-tint</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.500 0.130 150); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Positive</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--positive</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.955 0.030 150); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Positive tint</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--positive-tint</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.520 0.110 70); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Warn</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--warn</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.955 0.035 75); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Warn tint</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--warn-tint</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.520 0.160 27); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Danger</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--danger</div>
+</div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+  <div style="height: 52px; border-radius: 6px; background: oklch(0.955 0.028 27); border: 1px solid oklch(0.900 0 0);"></div>
+  <div style="font-size: 13px; font-weight: 600; color: oklch(0.200 0 0);">Danger tint</div>
+  <div style="font-size: 10px; color: oklch(0.650 0 0); word-break: break-all; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">--danger-tint</div>
+</div>
+    </div>
+  </div>
+
+  <div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.650 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">02</div>
+  <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.018em; color: oklch(0.200 0 0);">Type</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 640px;">One typeface: IBM Plex Sans, drawn for dense technical software and carrying true tabular figures. A second family would be decoration. Times, counts and amounts always set tabular so columns line up down a list.</div>
+</div>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Display</div>
+          <div style="flex-grow: 1; font-size: 28px; font-weight: 700; letter-spacing: -0.021em; color: oklch(0.200 0 0); ">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">28 / 34 / 700 / -0.021em</div>
+        </div><div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Title</div>
+          <div style="flex-grow: 1; font-size: 22px; font-weight: 700; letter-spacing: -0.018em; color: oklch(0.200 0 0); ">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">22 / 28 / 700 / -0.018em</div>
+        </div><div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Heading</div>
+          <div style="flex-grow: 1; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: oklch(0.200 0 0); ">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">17 / 24 / 600 / -0.01em</div>
+        </div><div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Row</div>
+          <div style="flex-grow: 1; font-size: 16px; font-weight: 600; letter-spacing: -0.008em; color: oklch(0.200 0 0); ">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">16 / 22 / 600 / -0.008em</div>
+        </div><div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Body</div>
+          <div style="flex-grow: 1; font-size: 15px; font-weight: 400; letter-spacing: 0; color: oklch(0.200 0 0); ">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">15 / 21 / 400</div>
+        </div><div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Label</div>
+          <div style="flex-grow: 1; font-size: 13px; font-weight: 400; letter-spacing: 0; color: oklch(0.200 0 0); ">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">13 / 18 / 400</div>
+        </div><div style="display: flex; align-items: baseline; gap: 24px; padding-bottom: 11px; border-bottom: 1px solid oklch(0.900 0 0);">
+          <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Micro</div>
+          <div style="flex-grow: 1; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; color: oklch(0.200 0 0); text-transform: uppercase;">Capture a receipt</div>
+          <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">11 / 14 / 600 / 0.04em / uppercase</div>
+        </div>
+      <div style="display: flex; align-items: baseline; gap: 24px; padding-top: 2px;">
+        <div style="width: 110px; flex-shrink: 0; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: oklch(0.650 0 0);">Amount</div>
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px; align-items: flex-start;">
+          <span style="font-size: 19px; font-weight: 600; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">89.40</span><span style="font-size: 19px; font-weight: 600; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">128.05</span><span style="font-size: 19px; font-weight: 600; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">7.99</span>
+        </div>
+        <div style="font-size: 11px; color: oklch(0.500 0 0); white-space: nowrap; font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">19 / 600 / tabular</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div style="display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+  <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.650 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">03</div>
+  <div style="font-size: 22px; font-weight: 700; letter-spacing: -0.018em; color: oklch(0.200 0 0);">Space, radius, reach</div>
+  <div style="font-size: 14px; line-height: 20px; color: oklch(0.500 0 0); max-width: 640px;">Spacing steps of 4. Screen gutter 16 &mdash; content gets the width. Two corner radii in the entire system, and no third one is permitted.</div>
+</div>
+    <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.650 0 0);">Spacing</div>
+        <div style="display: flex; align-items: flex-end; gap: 10px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 4px; height: 4px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">4</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 8px; height: 8px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">8</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 12px; height: 12px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">12</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 16px; height: 16px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">16</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 20px; height: 20px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">20</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 24px; height: 24px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">24</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 32px; height: 32px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">32</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 40px; height: 40px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">40</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 56px; height: 56px; background: oklch(0.200 0 0);"></div><div style="font-size: 10px; color: oklch(0.500 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">56</div></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.650 0 0);">Radius &mdash; only these two</div>
+        <div style="display: flex; align-items: flex-end; gap: 14px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 120px; height: 44px; background: #ffffff; border: 1px solid oklch(0.800 0 0); border-radius: 6px;"></div><div style="font-size: 11px; font-weight: 600; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">control 6</div><div style="font-size: 10px; color: oklch(0.650 0 0);">buttons · badges · thumbnails · chips</div></div><div style="display: flex; flex-direction: column; align-items: center; gap: 5px;"><div style="width: 120px; height: 44px; background: #ffffff; border: 1px solid oklch(0.800 0 0); border-radius: 12px;"></div><div style="font-size: 11px; font-weight: 600; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">card 12</div><div style="font-size: 10px; color: oklch(0.650 0 0);">sheets · cards · banners · toasts</div></div>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.650 0 0);">Frame</div>
+        <div style="font-size: 14px; line-height: 21px; color: oklch(0.200 0 0); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;">390 &times; 844 baseline<br>Safe area 59 top / 34 bottom<br>Gutter 16 &middot; row height 64<br>Button 48 &middot; hit floor 44</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":900,"height":1040}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+Use the designer agent on Jira ticket $ARGUMENTS: read it from KAN via MCP, verify it is in Ready for Design, establish or reuse the design/DESIGN-SYSTEM.md baseline, produce the /design canvas covering every state and visible AC, commit sources under design/, and comment on the ticket with the canvas location and the AC coverage map. Do not transition the ticket.

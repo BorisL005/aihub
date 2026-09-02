@@ -1,0 +1,177 @@
+{
+  "pages": [
+    {
+      "id": "flow",
+      "name": "Capture flow"
+    },
+    {
+      "id": "system",
+      "name": "Design system"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "ListEmpty.dc.html",
+      "title": "01 · List, empty",
+      "page": "flow",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "02 · List, populated",
+      "page": "flow",
+      "x": 450,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PermissionAsk.dc.html",
+      "title": "03 · Camera permission",
+      "page": "flow",
+      "x": 900,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PermissionDenied.dc.html",
+      "title": "04 · Permission off",
+      "page": "flow",
+      "x": 1350,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "CameraLive.dc.html",
+      "title": "05 · Camera live",
+      "page": "flow",
+      "x": 0,
+      "y": 960,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Preview.dc.html",
+      "title": "06 · Preview",
+      "page": "flow",
+      "x": 450,
+      "y": 960,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Discard.dc.html",
+      "title": "07 · Discard photo",
+      "page": "flow",
+      "x": 900,
+      "y": 960,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Uploading.dc.html",
+      "title": "08 · Saving",
+      "page": "flow",
+      "x": 1350,
+      "y": 960,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "UploadError.dc.html",
+      "title": "09 · Save failed",
+      "page": "flow",
+      "x": 0,
+      "y": 1920,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PhotoRejected.dc.html",
+      "title": "10 · Photo rejected",
+      "page": "flow",
+      "x": 450,
+      "y": 1920,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "SuccessList.dc.html",
+      "title": "11 · Saved",
+      "page": "flow",
+      "x": 900,
+      "y": 1920,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Foundations.dc.html",
+      "title": "Foundations",
+      "page": "system",
+      "x": 0,
+      "y": 0,
+      "w": 900,
+      "h": 1040
+    },
+    {
+      "file": "Components.dc.html",
+      "title": "Primitives",
+      "page": "system",
+      "x": 960,
+      "y": 0,
+      "w": 900,
+      "h": 1140
+    }
+  ],
+  "annotations": [
+    {
+      "id": "read-me",
+      "page": "flow",
+      "x": 0,
+      "y": -230,
+      "w": 500,
+      "text": "KAN-5 — photograph a receipt (slice 2/4).\nEvery state the ticket names has an artboard. Numbers run in flow order; the ticket comment maps each acceptance criterion to an artboard.\n\nVisual language follows the owner-set aesthetic direction: one typeface doing the hierarchy, neutral base, one accent spent only on progress and interactive text, two corner radii, flat surfaces."
+    },
+    {
+      "id": "permission",
+      "page": "flow",
+      "x": 900,
+      "y": -230,
+      "w": 420,
+      "text": "03 is our own screen, shown before the system prompt. The system camera prompt itself is never drawn or imitated — tapping Allow camera hands off to the OS.\n\n04 is the only route back once access is off: Settings, or back to the list."
+    },
+    {
+      "id": "one-upload",
+      "page": "flow",
+      "x": 1350,
+      "y": 780,
+      "w": 400,
+      "text": "Getting the upload address and sending the photo are two network calls, but one bar. It never resets, never restarts, never goes backwards — the user sees a single save.\n\nThis is the one place the accent fills a shape: it reports state, so it earns the colour."
+    },
+    {
+      "id": "errors-out",
+      "page": "flow",
+      "x": 0,
+      "y": 1780,
+      "w": 470,
+      "text": "No error is a dead end. 09 keeps the photo on the device and offers Try again plus a way back. 10 cannot be retried with the same photo, so it offers a fresh one instead.\n\nAn expired upload address and a photo the server cannot find both surface as 09 — the user cannot act on the difference."
+    },
+    {
+      "id": "row-stable",
+      "page": "system",
+      "x": 0,
+      "y": -180,
+      "w": 460,
+      "text": "The entry row is the piece KAN-6 edits. Its geometry is fixed here so extraction changes the words, not the layout — no reflow when a receipt is read."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "flow"
+  }
+}
