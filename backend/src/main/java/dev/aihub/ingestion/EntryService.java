@@ -1,26 +1,26 @@
 package dev.aihub.ingestion;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.aihub.common.NotFoundException;
 import dev.aihub.security.AuthenticatedUser;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 @Service
 public class EntryService {
 
     private final ProjectRepository projectRepository;
     private final EntryRepository entryRepository;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     public EntryService(
-            ProjectRepository projectRepository, EntryRepository entryRepository, ObjectMapper objectMapper) {
+            ProjectRepository projectRepository, EntryRepository entryRepository, JsonMapper jsonMapper) {
         this.projectRepository = projectRepository;
         this.entryRepository = entryRepository;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     /**
@@ -45,8 +45,8 @@ public class EntryService {
 
     private JsonNode parsePayload(String payloadJson) {
         try {
-            return objectMapper.readTree(payloadJson);
-        } catch (JsonProcessingException e) {
+            return jsonMapper.readTree(payloadJson);
+        } catch (JacksonException e) {
             throw new IllegalStateException("stored entry payload is not valid JSON", e);
         }
     }

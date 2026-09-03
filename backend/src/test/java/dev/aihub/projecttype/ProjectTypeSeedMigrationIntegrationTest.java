@@ -2,8 +2,6 @@ package dev.aihub.projecttype;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.aihub.common.Tables.ProjectTypes;
 import dev.aihub.support.AbstractIntegrationTest;
 import java.util.ArrayList;
@@ -12,6 +10,8 @@ import java.util.Set;
 import org.jooq.Record;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 class ProjectTypeSeedMigrationIntegrationTest extends AbstractIntegrationTest {
 
@@ -21,11 +21,11 @@ class ProjectTypeSeedMigrationIntegrationTest extends AbstractIntegrationTest {
             Set.of("merchant", "purchased_at", "total", "currency");
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
     // AC-6
     @Test
-    void seedsReceiptsProjectTypeWithExactFieldSchemaAndLogicalModelNames() throws Exception {
+    void seedsReceiptsProjectTypeWithExactFieldSchemaAndLogicalModelNames() {
         Record row = dsl
                 .select(ProjectTypes.NAME, ProjectTypes.SCHEMA, ProjectTypes.EXTRACTION_MODEL, ProjectTypes.ANSWER_MODEL)
                 .from(ProjectTypes.TABLE)
@@ -34,10 +34,9 @@ class ProjectTypeSeedMigrationIntegrationTest extends AbstractIntegrationTest {
 
         assertThat(row).isNotNull();
 
-        JsonNode schema = objectMapper.readTree(row.get(ProjectTypes.SCHEMA).data());
+        JsonNode schema = jsonMapper.readTree(row.get(ProjectTypes.SCHEMA).data());
 
-        List<String> properties = new ArrayList<>();
-        schema.get("properties").fieldNames().forEachRemaining(properties::add);
+        List<String> properties = List.copyOf(schema.get("properties").propertyNames());
         assertThat(properties).containsExactlyInAnyOrderElementsOf(EXPECTED_FIELDS);
 
         List<String> required = new ArrayList<>();
