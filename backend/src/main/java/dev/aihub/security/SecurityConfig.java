@@ -7,8 +7,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
@@ -34,12 +39,25 @@ public class SecurityConfig {
     /**
      * Only created when {@code auth0.issuer-uri} (env var {@code AUTH0_ISSUER_URI}) is
      * configured, so that tests can supply their own {@link JwtDecoder} without a real Auth0
-     * tenant. In production this must be set — with no decoder bean, {@code oauth2ResourceServer}
-     * fails fast at startup rather than silently accepting unvalidated tokens.
+     * tenant. In production this must be set, along with {@code auth0.audience} (env var
+     * {@code AUTH0_AUDIENCE}) - see backend/README.md. With no decoder bean, {@code
+     * oauth2ResourceServer} fails fast at startup rather than silently accepting unvalidated
+     * tokens.
+     *
+     * <p>Validates issuer, expiry and audience. Audience matters because Auth0 issues access
+     * tokens per-API within a tenant: signature and issuer alone don't distinguish a token minted
+     * for this API from one minted for a different API in the same tenant.
      */
     @Bean
     @ConditionalOnProperty(prefix = "auth0", name = "issuer-uri")
     JwtDecoder jwtDecoder(Environment env) {
-        return JwtDecoders.fromIssuerLocation(env.getRequiredProperty("auth0.issuer-uri"));
+        String issuerUri = env.getRequiredProperty("auth0.issuer-uri");
+        String audience = env.getRequiredProperty("auth0.audience");
+
+        NimbusJwtDecoder decoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuerUri);
+        OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
+                JwtValidators.createDefaultWithIssuer(issuerUri), new AudienceValidator(audience));
+        decoder.setJwtValidator(validator);
+        return decoder;
     }
 }

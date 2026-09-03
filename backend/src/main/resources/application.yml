@@ -5,7 +5,8 @@ spring:
     problemdetails:
       enabled: true
 
-# Auth0 issuer for JWT validation (Spring Security resource server). Required in every real
-# environment; read from the AUTH0_ISSUER_URI env var via Spring's relaxed binding. Left unset
-# here on purpose - see dev.aihub.security.SecurityConfig.jwtDecoder.
+# Auth0 issuer + audience for JWT validation (Spring Security resource server). Required in
+# every real environment; read from the AUTH0_ISSUER_URI / AUTH0_AUDIENCE env vars via Spring's
+# relaxed binding. Left unset here on purpose - see dev.aihub.security.SecurityConfig.jwtDecoder
+# and backend/README.md.
 

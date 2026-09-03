@@ -32,7 +32,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Project"
         "401":
-          description: Missing, malformed, or expired JWT.
+          description: Missing, malformed, or expired JWT. No response body.
 
   /projects/{projectId}/entries:
     get:
@@ -72,12 +72,20 @@ paths:
                 $ref: "#/components/schemas/EntryPage"
         "400":
           description: limit exceeds the maximum, or cursor is malformed.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
         "401":
-          description: Missing, malformed, or expired JWT.
+          description: Missing, malformed, or expired JWT. No response body.
         "404":
           description: >-
             No project with this id is owned by the caller. Identical whether the id does not
             exist at all or belongs to another user - the response never reveals which.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
 
 components:
   securitySchemes:
@@ -87,6 +95,25 @@ components:
       bearerFormat: JWT
 
   schemas:
+    ProblemDetail:
+      type: object
+      description: >-
+        RFC 9457 problem details, as produced by Spring's ProblemDetail (spring.mvc.problemdetails
+        is enabled). Every 4xx response from this API that carries a body uses this shape.
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+
     Project:
       type: object
       required: [id, name, projectType]

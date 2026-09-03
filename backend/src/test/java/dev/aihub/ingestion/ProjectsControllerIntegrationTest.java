@@ -76,6 +76,32 @@ class ProjectsControllerIntegrationTest extends AbstractIntegrationTest {
         assertThat(dsl.fetchCount(Projects.TABLE, Projects.USER_ID.eq(userId))).isZero();
     }
 
+    // AC-2 (issuer validation - mirrors SecurityConfig.jwtDecoder's issuer pinning)
+    @Test
+    void listProjectsRejectsJwtFromAnUnexpectedIssuerAndProvisionsNothing() {
+        String userId = uniqueUserId();
+
+        restTestClient.get().uri("/projects")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.wrongIssuerToken(userId))
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        assertThat(dsl.fetchCount(Projects.TABLE, Projects.USER_ID.eq(userId))).isZero();
+    }
+
+    // AC-2 (audience validation - a token minted for a different API in the same tenant)
+    @Test
+    void listProjectsRejectsJwtWithAnUnexpectedAudienceAndProvisionsNothing() {
+        String userId = uniqueUserId();
+
+        restTestClient.get().uri("/projects")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.wrongAudienceToken(userId))
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        assertThat(dsl.fetchCount(Projects.TABLE, Projects.USER_ID.eq(userId))).isZero();
+    }
+
     // AC-10
     @Test
     void firstAuthenticatedRequestProvisionsExactlyOneReceiptsProject() {

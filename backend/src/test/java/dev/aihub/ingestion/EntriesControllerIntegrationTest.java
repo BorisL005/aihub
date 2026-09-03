@@ -66,6 +66,71 @@ class EntriesControllerIntegrationTest extends AbstractIntegrationTest {
                 .jsonPath("$.nextCursor").doesNotExist();
     }
 
+    // AC-4 (cursor precision): entries sharing a timestamp across a page boundary must not be
+    // silently dropped by cursor truncation.
+    @Test
+    void listEntriesDoesNotSkipEntriesSharingTheSameTimestampAcrossAPageBoundary() {
+        String userId = uniqueUserId();
+        UUID projectId = provisionProject(userId);
+        OffsetDateTime sharedTs = OffsetDateTime.now();
+        for (int i = 0; i < 3; i++) {
+            insertEntry(projectId, sharedTs, "camera", "pending");
+        }
+
+        byte[] firstPageBody = restTestClient.get().uri("/projects/{id}/entries?limit=1", projectId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.items.length()").isEqualTo(1)
+                .jsonPath("$.nextCursor").exists()
+                .returnResult()
+                .getResponseBody();
+        String cursor = JsonPath.read(new String(firstPageBody, StandardCharsets.UTF_8), "$.nextCursor");
+
+        restTestClient.get().uri("/projects/{id}/entries?limit=10&cursor={cursor}", projectId, cursor)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.items.length()").isEqualTo(2);
+    }
+
+    // Notes for dev: reject a limit above 100 with 400
+    @Test
+    void listEntriesRejects400ForLimitAboveMaximum() {
+        String userId = uniqueUserId();
+        UUID projectId = provisionProject(userId);
+
+        restTestClient.get().uri("/projects/{id}/entries?limit=101", projectId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void listEntriesRejects400ForLimitBelowMinimum() {
+        String userId = uniqueUserId();
+        UUID projectId = provisionProject(userId);
+
+        restTestClient.get().uri("/projects/{id}/entries?limit=0", projectId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    // AC-4 / EntryCursor.decode
+    @Test
+    void listEntriesRejects400ForMalformedCursor() {
+        String userId = uniqueUserId();
+        UUID projectId = provisionProject(userId);
+
+        restTestClient.get().uri("/projects/{id}/entries?cursor=not-a-real-cursor", projectId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
     // AC-5
     @Test
     void listEntriesReturns404ForNonexistentProject() {
