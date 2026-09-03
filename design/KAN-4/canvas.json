@@ -1,0 +1,77 @@
+{
+  "artboards": [
+    {
+      "file": "ListEmpty.dc.html",
+      "title": "01 · List, empty",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "ListLoading.dc.html",
+      "title": "02 · List, loading",
+      "x": 450,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "ListError.dc.html",
+      "title": "03 · List, error",
+      "x": 900,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "04 · List, populated",
+      "x": 1350,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "PullToRefresh.dc.html",
+      "title": "05 · Pull to refresh",
+      "x": 1800,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    }
+  ],
+  "annotations": [
+    {
+      "id": "read-me",
+      "x": 0,
+      "y": -230,
+      "w": 560,
+      "text": "KAN-4 — receipts project and entry list (slice 1/4).\n\nBaseline is inherited unchanged from KAN-5's canvas and design/DESIGN-SYSTEM.md (both already re-derived from the owner-set §Aesthetic direction — verified current, no re-derivation needed here). 01 and 04 are reused byte-for-byte from KAN-5's ListEmpty.dc.html and Main.dc.html, per this ticket's Notes for design. 02, 03 and 05 are new: this ticket owns list loading, list error, and pull-to-refresh."
+    },
+    {
+      "id": "row-no-reflow",
+      "x": 0,
+      "y": 900,
+      "w": 480,
+      "text": "Every state (loading skeleton, empty, error's own layout aside, populated, refreshing) uses the identical 64px row / 40×40 thumbnail / 88px-min right slot geometry. Swapping states — or KAN-6 swapping in merchant + amount later — never reflows the list."
+    },
+    {
+      "id": "error-deviation",
+      "x": 900,
+      "y": 900,
+      "w": 420,
+      "text": "Deviation from the system's \"one way forward, one way back\" rule: 03 offers only Try again. This screen is the app's front door (no picker, no screen behind it) — there is no \"back\" to give."
+    },
+    {
+      "id": "new-primitives",
+      "x": 1350,
+      "y": 900,
+      "w": 450,
+      "text": "Two additions to DESIGN-SYSTEM.md §5: the skeleton row (--sunk fill, same geometry as the entry row, opacity-pulse) and the refresh spinner (--accent stroke — the same progress exemption the upload bar uses)."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}
