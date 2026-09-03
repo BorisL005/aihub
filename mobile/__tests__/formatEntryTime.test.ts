@@ -15,4 +15,13 @@ describe("formatEntryTime", () => {
   it("labels an older entry with its day and month", () => {
     expect(formatEntryTime("2026-08-31T19:22:00", now)).toBe("31 Aug, 19:22");
   });
+
+  it("renders the midnight hour as 00, not 24", () => {
+    expect(formatEntryTime("2026-09-03T00:05:00", now)).toBe("Today, 00:05");
+  });
+
+  it("uses the fixed day-then-month order regardless of runtime locale", () => {
+    // en-US's toLocaleDateString would render this "Jan 5" - the canvas fixes "5 Jan".
+    expect(formatEntryTime("2026-01-05T09:00:00", now)).toBe("5 Jan, 09:00");
+  });
 });

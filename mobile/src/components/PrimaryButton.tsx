@@ -3,9 +3,24 @@ import { colors } from "../theme/colors";
 import { radius, typography } from "../theme/tokens";
 
 // DESIGN-SYSTEM.md §5 Buttons - Primary: 48 tall, control radius, ink fill, white label.
-export function PrimaryButton({ label, onPress }: { label: string; onPress?: () => void }) {
+// Disabled: 35% opacity, no colour change.
+export function PrimaryButton({
+  label,
+  onPress,
+  disabled = false,
+}: {
+  label: string;
+  onPress?: () => void;
+  disabled?: boolean;
+}) {
   return (
-    <Pressable style={styles.button} onPress={onPress} accessibilityRole="button">
+    <Pressable
+      style={[styles.button, disabled && styles.disabled]}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+    >
       <Text style={styles.label}>{label}</Text>
     </Pressable>
   );
@@ -18,6 +33,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
     alignItems: "center",
     justifyContent: "center",
+  },
+  disabled: {
+    opacity: 0.35,
   },
   label: {
     color: colors.surface,

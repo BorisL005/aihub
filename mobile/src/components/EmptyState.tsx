@@ -4,8 +4,9 @@ import { spacing, typography } from "../theme/tokens";
 import { PrimaryButton } from "./PrimaryButton";
 
 // design/KAN-4/ListEmpty.dc.html (reused byte-for-byte from KAN-5's canvas per this ticket's
-// Notes for design). Capture isn't built yet (KAN-5), so the button is present for visual
-// conformance but has no navigation target until that ticket lands.
+// Notes for design). Capture isn't built yet (KAN-5), so the button renders disabled (§5's
+// Disabled variant) rather than as a live control that silently does nothing when tapped -
+// a dead-looking primary CTA on the app's front door reads as a broken app.
 export function EmptyState() {
   return (
     <View style={styles.container} testID="empty-state">
@@ -14,7 +15,7 @@ export function EmptyState() {
         Take a photo of a receipt and you can throw the paper away straight after.
       </Text>
       <View style={styles.action}>
-        <PrimaryButton label="Capture receipt" />
+        <PrimaryButton label="Capture receipt" disabled />
       </View>
     </View>
   );

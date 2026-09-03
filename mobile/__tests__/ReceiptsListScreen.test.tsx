@@ -62,6 +62,9 @@ describe("ReceiptsListScreen", () => {
 
     await waitFor(() => expect(screen.getByTestId("empty-state")).toBeTruthy());
     expect(screen.getByText("No receipts yet")).toBeTruthy();
+    // Capture isn't built yet (KAN-5) - the CTA must be genuinely disabled, not a live-looking
+    // control that does nothing when tapped.
+    expect(screen.getByRole("button")).toBeDisabled();
   });
 
   // AC-8: populated list, each row shows date and status

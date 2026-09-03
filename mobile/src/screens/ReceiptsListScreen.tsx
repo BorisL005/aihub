@@ -59,6 +59,11 @@ export function ReceiptsListScreen() {
           keyExtractor={(entry) => entry.id}
           renderItem={({ item }) => <EntryRow entry={item} />}
           refreshControl={
+            // Deviation from DESIGN-SYSTEM.md §5's Refresh spinner primitive (a custom 20px
+            // accent ring), raised on KAN-4 rather than resolved silently: the OS-native pull
+            // gesture and indicator are the platform-idiomatic affordance and get the accent
+            // colour right, but their appearance isn't fully controllable to match the spec on
+            // either platform. Needs an explicit call from design/owner, not an engineering one.
             <RefreshControl
               refreshing={isRefreshing}
               onRefresh={onRetry}
