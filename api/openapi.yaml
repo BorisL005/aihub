@@ -2,6 +2,139 @@ openapi: 3.1.0
 info:
   title: AI Hub API
   version: 0.0.1
-paths: {}
+
+# Staging/production hostnames aren't provisioned yet (deploy/ is still empty - see
+# ARCHITECTURE.md §2 Hosting). Update this once the deploy ticket assigns real domains.
+servers:
+  - url: http://localhost:8080
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+paths:
+  /projects:
+    get:
+      operationId: listProjects
+      summary: List the caller's projects
+      description: >-
+        Returns every project owned by the caller. On a user's first authenticated call, their
+        receipts project is auto-provisioned before the list is returned (there is no
+        project-creation endpoint in v1).
+      tags: [projects]
+      responses:
+        "200":
+          description: The caller's projects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+        "401":
+          description: Missing, malformed, or expired JWT.
+
+  /projects/{projectId}/entries:
+    get:
+      operationId: listProjectEntries
+      summary: List a project's entries
+      description: >-
+        Returns entries for a project owned by the caller, newest first, keyset-paginated.
+      tags: [projects]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          required: false
+          description: Max entries to return. Default 20, maximum 100.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque pagination cursor from a previous response's nextCursor.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A page of entries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntryPage"
+        "400":
+          description: limit exceeds the maximum, or cursor is malformed.
+        "401":
+          description: Missing, malformed, or expired JWT.
+        "404":
+          description: >-
+            No project with this id is owned by the caller. Identical whether the id does not
+            exist at all or belongs to another user - the response never reveals which.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Project:
+      type: object
+      required: [id, name, projectType]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        projectType:
+          type: string
+          description: The project_type name, e.g. "receipts".
+
+    EntryPage:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Entry"
+        nextCursor:
+          type: string
+          description: Pass as the cursor query parameter to fetch the next page. Absent on the last page.
+
+    Entry:
+      type: object
+      required: [id, ts, source, validationStatus, payload]
+      properties:
+        id:
+          type: string
+          format: uuid
+        ts:
+          type: string
+          format: date-time
+          description: Ingest time (not the receipt's purchase date, which lives in payload.purchased_at).
+        source:
+          type: string
+          description: How the entry was captured, e.g. "camera".
+        validationStatus:
+          type: string
+          enum: [pending, extracted, needs_review]
+        payload:
+          type: object
+          description: >-
+            The project_type's field schema. For the receipts type: merchant, purchased_at,
+            total, currency (required), tax_total, payment_method, line_items (optional). Empty
+            until extraction (KAN-6) fills it in.
+
 # Contract-first: endpoints are added here in the same commit as their implementation.
 # The Expo TS client is generated from this file.
