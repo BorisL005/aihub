@@ -48,15 +48,15 @@ class ProjectTypeSeedMigrationIntegrationTest extends AbstractIntegrationTest {
         String answerModel = row.get(ProjectTypes.ANSWER_MODEL);
         assertThat(extractionModel).isNotBlank();
         assertThat(answerModel).isNotBlank();
-        assertThat(extractionModel.toLowerCase()).doesNotContainAnyOf("gpt", "gemini", "claude", "sonnet", "opus");
-        assertThat(answerModel.toLowerCase()).doesNotContainAnyOf("gpt", "gemini", "claude", "sonnet", "opus");
+        assertThat(extractionModel.toLowerCase()).doesNotContain("gpt", "gemini", "claude", "sonnet", "opus");
+        assertThat(answerModel.toLowerCase()).doesNotContain("gpt", "gemini", "claude", "sonnet", "opus");
     }
 
     // AC-9
     @Test
     void hasNoUsersTableAfterMigrationsRun() {
-        Integer count = dsl.fetchValue(
-                "select count(*) from information_schema.tables where table_name = 'users'", Integer.class);
-        assertThat(count).isZero();
+        Number count = (Number) dsl.fetchValue(
+                "select count(*) from information_schema.tables where table_name = 'users'");
+        assertThat(count.intValue()).isZero();
     }
 }
