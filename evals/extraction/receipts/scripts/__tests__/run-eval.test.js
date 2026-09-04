@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
 const { runEval, loadExtractor } = require('../run-eval');
 const stubExtractor = require('../extractor');
@@ -12,6 +13,7 @@ const PERFECT_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-perfe
 const DUPLICATE_020_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-duplicate-020.js');
 const EMPTY_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-empty.js');
 const THROWS_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-throws.js');
+const CLI_PATH = path.join(__dirname, '..', 'run-eval.js');
 
 test('no extractor wired: every pair is reported "not evaluated", never a fabricated score', async () => {
   const dir = makeValidFixtureSet(24);
@@ -102,6 +104,24 @@ test('AC-8: report states the total pair count (24) and the partial-set batch-00
     assert.match(report, /30-50 target/);
     assert.match(report, /Batch 003/);
     assert.match(report, /Polish fiscal/);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8: a run that cannot even start (bad EXTRACTOR_MODULE) still prints a report ' +
+  'naming every pair as aborted, and exits non-zero', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    const proc = spawnSync('node', [CLI_PATH, dir], {
+      encoding: 'utf8',
+      env: { ...process.env, EXTRACTOR_MODULE: path.join(__dirname, 'fixtures', 'does-not-exist.js') },
+    });
+
+    assert.notEqual(proc.status, 0);
+    assert.match(proc.stdout, /24 pair\(s\) evaluated/);
+    assert.match(proc.stdout, /run aborted before evaluation/);
+    assert.match(proc.stderr, /receipt eval run failed/);
   } finally {
     cleanup(dir);
   }
