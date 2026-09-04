@@ -59,6 +59,18 @@ test('AC-6: pair 019 — extraction correctly abstaining (null) also scores as a
   assert.equal(results[0].status, 'hit');
 });
 
+test('a `_`-prefixed annotation key nested inside an object field is also excluded, not just top-level keys', () => {
+  const expected = {
+    line_items: [{ name: 'Coffee', price: 4.5, _note: 'handwritten add-on, easy to misread' }],
+  };
+  const actual = { line_items: [{ name: 'Coffee', price: 4.5 }] };
+
+  const results = compareEntry(expected, actual);
+
+  assert.equal(results.length, 1);
+  assert.equal(results[0].status, 'hit');
+});
+
 test('a field missing entirely from the extraction result is scored as a miss, not skipped', () => {
   const results = compareEntry({ merchant: 'SOHO' }, {});
   assert.equal(results.length, 1);

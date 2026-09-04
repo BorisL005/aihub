@@ -20,8 +20,12 @@ function deepEqual(a, b) {
     return a.every((item, i) => deepEqual(item, b[i]));
   }
   if (typeof a === 'object' && typeof b === 'object') {
-    const aKeys = Object.keys(a);
-    const bKeys = Object.keys(b);
+    // `_`-prefixed keys are annotation metadata at every nesting depth, not
+    // just the top level `compareEntry` iterates — otherwise an annotation
+    // inside a nested object (e.g. a line_items[] entry) makes the whole
+    // object an automatic miss via the length guard below.
+    const aKeys = Object.keys(a).filter((key) => !isAnnotationKey(key));
+    const bKeys = Object.keys(b).filter((key) => !isAnnotationKey(key));
     if (aKeys.length !== bKeys.length) return false;
     return aKeys.every((key) => deepEqual(a[key], b[key]));
   }

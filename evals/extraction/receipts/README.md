@@ -3,8 +3,12 @@
 Pairs: `NNN.jpg` + `NNN.expected.json` (reference extraction). Target: 30-50 real receipts
 incl. crumpled, handwritten, and Polish fiscal (comma decimals). Run on every prompt/model change.
 
-Fixture files (`*.jpg`, `*.expected.json`) are gitignored — they are not committed. This
-file, `MANIFEST.md`, and `MANIFEST-002.md` are the only tracked files in this directory.
+Fixture files (`*.jpg`, `*.expected.json`) are gitignored — they are not committed.
+`MANIFEST.md` and `MANIFEST-002.md` are also gitignored: they are private R2 bucket
+contents (owner spend history) and must never be committed to this public repo, even
+though CI reads their names for the pairing check below. They arrive locally the same
+way the fixtures do — via the R2 sync. This `README.md`, and the `scripts/` directory,
+are the only tracked contents of this directory.
 
 ## Source of truth
 

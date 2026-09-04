@@ -35,14 +35,27 @@ async function runEval(dir, extractor) {
     const nnn = pad3(i);
     const jpgPath = path.join(dir, `${nnn}.jpg`);
     const jsonPath = path.join(dir, `${nnn}.expected.json`);
-    const expected = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+
+    let expected;
+    try {
+      expected = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    } catch (err) {
+      results.push({ id: nnn, status: 'mismatch', detail: `failed to load fixture: ${err.message}` });
+      continue;
+    }
 
     if (!extractor.wired) {
       results.push({ id: nnn, status: 'not_evaluated' });
       continue;
     }
 
-    const entries = await extractor.extract(jpgPath);
+    let entries;
+    try {
+      entries = await extractor.extract(jpgPath);
+    } catch (err) {
+      results.push({ id: nnn, status: 'mismatch', detail: `extractor error: ${err.message}` });
+      continue;
+    }
 
     if (entries.length === 0) {
       results.push({ id: nnn, status: 'mismatch', detail: 'no entries returned by extractor' });
@@ -73,8 +86,26 @@ async function main() {
     process.exit(1);
   }
 
-  const extractor = loadExtractor(extractorModulePath);
-  const results = await runEval(dir, extractor);
+  let results;
+  try {
+    const extractor = loadExtractor(extractorModulePath);
+    results = await runEval(dir, extractor);
+  } catch (err) {
+    // AC-8: the report is owed on success or failure. runEval itself never
+    // throws for a per-pair problem (extractor error, bad fixture — see
+    // above); this only catches a run that couldn't start at all (e.g. a
+    // bad EXTRACTOR_MODULE path). Still emit a report naming every expected
+    // pair as aborted, rather than exiting with no report at all.
+    console.error(`receipt eval run failed: ${err.message}`);
+    results = Array.from({ length: EXPECTED_COUNT }, (_, i) => ({
+      id: pad3(i + 1),
+      status: 'mismatch',
+      detail: `run aborted before evaluation: ${err.message}`,
+    }));
+    console.log(generateReport(results));
+    process.exit(1);
+  }
+
   console.log(generateReport(results));
 }
 

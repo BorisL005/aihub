@@ -5,21 +5,40 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const WORKFLOW_PATH = path.join(
-  __dirname,
-  '..', '..', '..', '..', '..',
-  '.github', 'workflows', 'receipt-eval.yml'
-);
+const REPO_ROOT = path.join(__dirname, '..', '..', '..', '..', '..');
+const WORKFLOW_PATH = path.join(REPO_ROOT, '.github', 'workflows', 'receipt-eval.yml');
+const README_PATH = path.join(REPO_ROOT, 'evals', 'extraction', 'receipts', 'README.md');
 
 function readWorkflow() {
   return fs.readFileSync(WORKFLOW_PATH, 'utf8');
 }
 
+// Reads the actual sync step's working-directory and command out of the
+// workflow, resolves its destination against that working-directory, and
+// compares the result to the destination the README documents — so a change
+// to either file without the other is caught, instead of both sides being
+// asserted independently against a hardcoded string neither one owns.
 test('AC-1: the workflow syncs the eval set with the README-documented aws s3 sync command form', () => {
   const yaml = readWorkflow();
-  assert.match(
-    yaml,
-    /aws s3 sync s3:\/\/aihub-evals\/receipts\/ \. --endpoint-url "\$R2_ENDPOINT"/
+  const readme = fs.readFileSync(README_PATH, 'utf8');
+
+  const readmeMatch = readme.match(/aws s3 sync (\S+) (\S+) --endpoint-url "\$R2_ENDPOINT"/);
+  assert.ok(readmeMatch, 'README must document the aws s3 sync command form');
+  const [, readmeSource, readmeDest] = readmeMatch;
+
+  const syncStepMatch = yaml.match(
+    /Sync eval set from R2[\s\S]*?working-directory:\s*(\S+)[\s\S]*?run:\s*aws s3 sync (\S+) (\S+) --endpoint-url "\$R2_ENDPOINT"/
+  );
+  assert.ok(syncStepMatch, 'workflow must have a "Sync eval set from R2" step running aws s3 sync');
+  const [, workingDir, workflowSource, workflowDest] = syncStepMatch;
+
+  assert.equal(workflowSource, readmeSource, 'sync source bucket/prefix must match the README');
+
+  const resolvedDest = `${path.posix.normalize(path.posix.join(workingDir, workflowDest))}/`;
+  assert.equal(
+    resolvedDest,
+    readmeDest,
+    'sync destination, resolved against the step\'s working-directory, must match the README-documented path'
   );
 });
 

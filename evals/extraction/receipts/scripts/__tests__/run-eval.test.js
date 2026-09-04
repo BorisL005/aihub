@@ -11,6 +11,7 @@ const { makeValidFixtureSet, cleanup } = require('./test-helpers');
 const PERFECT_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-perfect.js');
 const DUPLICATE_020_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-duplicate-020.js');
 const EMPTY_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-empty.js');
+const THROWS_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-throws.js');
 
 test('no extractor wired: every pair is reported "not evaluated", never a fabricated score', async () => {
   const dir = makeValidFixtureSet(24);
@@ -60,6 +61,30 @@ test('a wired extractor returning zero entries is a mismatch, not "not evaluated
     const extractor = loadExtractor(EMPTY_EXTRACTOR);
     const results = await runEval(dir, extractor);
     assert.ok(results.every((r) => r.status === 'mismatch' && /no entries/.test(r.detail)));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8: a per-pair extraction failure is scored as a mismatch, not a run-aborting throw — ' +
+  'the report is still produced for every pair', async () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    const extractor = loadExtractor(THROWS_EXTRACTOR);
+    const results = await runEval(dir, extractor);
+
+    assert.equal(results.length, 24);
+    const pair013 = results.find((r) => r.id === '013');
+    assert.equal(pair013.status, 'mismatch');
+    assert.match(pair013.detail, /extractor error/);
+
+    const others = results.filter((r) => r.id !== '013');
+    assert.ok(others.every((r) => r.status === 'scored'));
+
+    const { generateReport } = require('../report');
+    const report = generateReport(results);
+    assert.match(report, /24 pair\(s\) evaluated/);
+    assert.match(report, /013: MISMATCH/);
   } finally {
     cleanup(dir);
   }
