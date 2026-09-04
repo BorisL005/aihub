@@ -75,7 +75,7 @@ test('AC-8: report states the total pair count (24) and the partial-set batch-00
     assert.match(report, /24 pair\(s\) evaluated/);
     assert.match(report, /batches 001-002/);
     assert.match(report, /30-50 target/);
-    assert.match(report, /batch 003/);
+    assert.match(report, /Batch 003/);
     assert.match(report, /Polish fiscal/);
   } finally {
     cleanup(dir);
