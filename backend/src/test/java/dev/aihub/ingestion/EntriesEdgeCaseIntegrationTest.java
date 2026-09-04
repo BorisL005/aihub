@@ -98,6 +98,24 @@ class EntriesEdgeCaseIntegrationTest extends AbstractIntegrationTest {
         assertThat(dsl.fetchCount(Projects.TABLE, Projects.USER_ID.isNull())).isZero();
     }
 
+    // AC-2 edge case, entries endpoint: the no-`sub` fix (SubjectValidator) is wired once at the
+    // JwtDecoder level, but proving it only against GET /projects would leave a materially
+    // different code path unverified. EntryService.listEntries never INSERTs - it calls
+    // ProjectRepository.isOwnedByUser(projectId, null), and jOOQ's `user_id = null` is never true
+    // in SQL, so a regression that dropped SubjectValidator wouldn't 500 here the way it did on
+    // /projects - it would silently 404, which still violates AC-2's "response is 401" contract
+    // but is a different failure shape and could hide behind AC-5/AC-S's identical 404 body.
+    @Test
+    void listEntriesRejectsJwtWithNoSubjectClaimAndProvisionsNothing() {
+        String userId = uniqueUserId();
+        UUID projectId = provisionProject(userId);
+
+        restTestClient.get().uri("/projects/{id}/entries", projectId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.noSubjectToken())
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
     private UUID provisionProject(String userId) {
         restTestClient.get().uri("/projects")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
