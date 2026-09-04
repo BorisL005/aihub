@@ -69,12 +69,30 @@ test('AC-3: orphaned unpaired file fails and names the file', () => {
   }
 });
 
-test('AC-3: a count other than 24 fails', () => {
+test('AC-3: a count other than 24 fails (under)', () => {
   const dir = makeValidFixtureSet(20);
   try {
     const result = validatePairs(dir);
     assert.equal(result.ok, false);
     assert.ok(result.problems.some((p) => p.includes('expected exactly 24 pairs')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: a count other than 24 fails (over — a 25th pair, e.g. batch 003 dropped in early)', () => {
+  const dir = makeValidFixtureSet(25);
+  try {
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(
+      result.problems.some((p) => p.includes('expected exactly 24 pairs')),
+      'must fail on 25 pairs, not just treat the extra as silently fine'
+    );
+    assert.ok(
+      result.problems.some((p) => p.includes('025')),
+      'must name pair 025 as the orphan/unexpected pair, not just report a bare count mismatch'
+    );
   } finally {
     cleanup(dir);
   }
@@ -98,6 +116,27 @@ test('AC-3: absent directory fails', () => {
   const result = validatePairs('/nonexistent/path/does-not-exist');
   assert.equal(result.ok, false);
   assert.ok(result.problems.some((p) => p.includes('does not exist')));
+});
+
+test('QA edge case: a stray subdirectory (e.g. a botched R2 sync nesting receipts/receipts/) ' +
+  'is silently ignored rather than flagged — validatePairs only inspects top-level files, so an ' +
+  'unexpected directory (and anything inside it) never trips the "no extra/unnumbered/unpaired ' +
+  'files" check from AC-2/AC-3', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.mkdirSync(path.join(dir, 'stray-subdir'));
+    fs.writeFileSync(path.join(dir, 'stray-subdir', 'oops.jpg'), Buffer.from([0xff]));
+
+    const result = validatePairs(dir);
+    assert.equal(
+      result.ok,
+      false,
+      'an unexpected directory dropped into the eval dir should fail validation (or at least be ' +
+        'named as a problem), not be silently skipped by the isFile() filter'
+    );
+  } finally {
+    cleanup(dir);
+  }
 });
 
 test('AC-3: README/MANIFEST files are ignored, not treated as orphans', () => {

@@ -59,6 +59,35 @@ test('AC-3: the job never skips or soft-passes past a validation failure (no con
   assert.doesNotMatch(yaml, /\|\|\s*true/);
 });
 
+test('AC-8: the report is produced on a validation failure too, not just success or an ' +
+  'in-run-eval failure (a hard "Validate synced eval set" failure must not silently skip ' +
+  'the "Run per-pair comparison"/report step)', () => {
+  const yaml = readWorkflow();
+
+  const compareStepMatch = yaml.match(/- name: Run per-pair comparison[\s\S]*?(?=\n\s{2,6}- name:|\n*$)/);
+  assert.ok(compareStepMatch, 'workflow must have a "Run per-pair comparison" step');
+
+  // AC-8 requires a report "when it completes (success or failure)". The
+  // only failure paths currently proven by run-eval.test.js are inside
+  // run-eval.js's own execution (a per-pair extractor throw, a bad
+  // EXTRACTOR_MODULE). But the far more common "failure" — the "Validate
+  // synced eval set" step (AC-3) exiting non-zero — is never exercised
+  // end-to-end at the workflow level: GitHub Actions steps stop on the
+  // first failure by default, and this step has no `if: always()` (or
+  // similar), so "Run per-pair comparison" — and therefore any report at
+  // all — is skipped entirely whenever AC-3 fires. That contradicts AC-8's
+  // literal "on completion, success or failure" language.
+  assert.match(
+    compareStepMatch[0],
+    /if:\s*always\(\)/,
+    'the "Run per-pair comparison" step has no `if: always()` (or equivalent), so a validate-pairs.js ' +
+      'failure (AC-3) skips this step and the job produces NO report at all — contradicting AC-8\'s ' +
+      '"on completion (success or failure)" requirement. Flagged in the PR as needing a PO ruling on ' +
+      'whether AC-3\'s "never continues past this point" should still win; until that ruling lands, ' +
+      'AC-8 is not met for the validation-failure case.'
+  );
+});
+
 test('KAN-9: this ticket adds a separate job and does not touch the build-and-test job', () => {
   const yaml = readWorkflow();
   assert.doesNotMatch(yaml, /build-and-test/);

@@ -13,6 +13,7 @@ const PERFECT_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-perfe
 const DUPLICATE_020_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-duplicate-020.js');
 const EMPTY_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-empty.js');
 const THROWS_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-throws.js');
+const MALFORMED_RETURN_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-malformed-return.js');
 const CLI_PATH = path.join(__dirname, '..', 'run-eval.js');
 
 test('no extractor wired: every pair is reported "not evaluated", never a fabricated score', async () => {
@@ -104,6 +105,36 @@ test('AC-8: report states the total pair count (24) and the partial-set batch-00
     assert.match(report, /30-50 target/);
     assert.match(report, /Batch 003/);
     assert.match(report, /Polish fiscal/);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('QA edge case: a wired extractor that resolves to a non-array (e.g. null) for one pair ' +
+  'takes down the whole run rather than being scored as a single-pair mismatch — the CLI still ' +
+  'prints a report naming every pair (per AC-8) and exits non-zero, but this is coarser than the ' +
+  '"throws" per-pair-isolation path and is a contract fragility KAN-6 should be aware of', async () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    // Confirm runEval() itself rejects rather than scoring pair 005 as a
+    // per-pair mismatch (unlike a thrown error from extract(), which IS
+    // caught per-pair — see the THROWS_EXTRACTOR test above).
+    const extractor = loadExtractor(MALFORMED_RETURN_EXTRACTOR);
+    await assert.rejects(() => runEval(dir, extractor), /Cannot read propert/);
+
+    // The CLI's outer catch (run-eval.js main()) still honors AC-8: a
+    // report is printed naming every expected pair, and the process exits
+    // non-zero, even though the underlying failure is a single malformed
+    // pair rather than a total pipeline failure.
+    const proc = spawnSync('node', [CLI_PATH, dir], {
+      encoding: 'utf8',
+      env: { ...process.env, EXTRACTOR_MODULE: MALFORMED_RETURN_EXTRACTOR },
+    });
+
+    assert.notEqual(proc.status, 0);
+    assert.match(proc.stdout, /24 pair\(s\) evaluated/);
+    assert.match(proc.stdout, /run aborted before evaluation/);
+    assert.match(proc.stderr, /receipt eval run failed/);
   } finally {
     cleanup(dir);
   }
