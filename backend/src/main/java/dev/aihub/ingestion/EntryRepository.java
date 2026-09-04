@@ -1,6 +1,7 @@
 package dev.aihub.ingestion;
 
 import dev.aihub.common.Tables.Entries;
+import dev.aihub.common.Tables.Projects;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -10,9 +11,9 @@ import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 /**
- * Tenant isolation for {@code entries} is enforced by the caller: every method here takes a
- * {@code projectId} that the caller has already proven, via {@link ProjectRepository}, is owned
- * by the authenticated user (spring-conventions - ownership joins through {@code projects}).
+ * Tenant isolation for {@code entries} is enforced structurally: every query here joins through
+ * {@code projects} and filters on {@code projects.user_id} (spring-conventions - ownership join),
+ * not merely on the caller having checked ownership first.
  */
 @Repository
 public class EntryRepository {
@@ -23,9 +24,14 @@ public class EntryRepository {
         this.dsl = dsl;
     }
 
-    /** One page of entries for {@code projectId}, ordered by {@code ts} descending, id-tiebroken. */
-    public Page findPage(UUID projectId, int limit, EntryCursor cursor) {
-        Condition condition = Entries.PROJECT_ID.eq(projectId);
+    /**
+     * One page of entries for {@code projectId} owned by {@code userId}, ordered by {@code ts}
+     * descending, id-tiebroken. Returns an empty page for a project that does not exist or is
+     * owned by a different user - the ownership join makes that indistinguishable at this layer,
+     * matching {@link EntryService}'s pre-check.
+     */
+    public Page findPage(UUID projectId, String userId, int limit, EntryCursor cursor) {
+        Condition condition = Entries.PROJECT_ID.eq(projectId).and(Projects.USER_ID.eq(userId));
         if (cursor != null) {
             condition = condition.and(
                     DSL.row(Entries.TS, Entries.ID).lt(DSL.row(cursor.ts(), cursor.id())));
@@ -33,6 +39,8 @@ public class EntryRepository {
 
         List<Row> rows = dsl.select(Entries.ID, Entries.TS, Entries.SOURCE, Entries.VALIDATION_STATUS, Entries.PAYLOAD)
                 .from(Entries.TABLE)
+                .join(Projects.TABLE)
+                .on(Entries.PROJECT_ID.eq(Projects.ID))
                 .where(condition)
                 .orderBy(Entries.TS.desc(), Entries.ID.desc())
                 .limit(limit + 1)

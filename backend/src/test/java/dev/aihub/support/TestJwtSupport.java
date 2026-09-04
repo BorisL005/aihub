@@ -27,8 +27,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 /**
  * Issues real, signed RS256 JWTs against a test-only key pair and exposes a matching
  * {@link JwtDecoder} bean, so integration tests exercise Spring Security's actual token
- * validation - issuer, expiry and audience, mirroring {@code SecurityConfig.jwtDecoder} - without
- * depending on network access to a real Auth0 tenant.
+ * validation - issuer, expiry, audience and subject presence, mirroring
+ * {@code SecurityConfig.jwtDecoder} - without depending on network access to a real Auth0 tenant.
  */
 @TestConfiguration
 public class TestJwtSupport {
@@ -84,7 +84,7 @@ public class TestJwtSupport {
      * always carry one, but nothing in {@code SecurityConfig}/{@code JwtValidators} requires its
      * presence, so this is reachable by any other correctly-configured OAuth2 issuer or a
      * misconfigured one. QA edge-case probe for AC-2 / AC-9 (see
-     * ingestion.EntriesEdgeCaseIntegrationTest / ProjectsEdgeCaseIntegrationTest).
+     * {@code ingestion.EntriesEdgeCaseIntegrationTest}).
      */
     public static String noSubjectToken() {
         JWTClaimsSet claims = new JWTClaimsSet.Builder()

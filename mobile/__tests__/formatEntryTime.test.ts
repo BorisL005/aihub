@@ -24,4 +24,13 @@ describe("formatEntryTime", () => {
     // en-US's toLocaleDateString would render this "Jan 5" - the canvas fixes "5 Jan".
     expect(formatEntryTime("2026-01-05T09:00:00", now)).toBe("5 Jan, 09:00");
   });
+
+  // The backend serialises OffsetDateTime as a Z-suffixed (UTC) string - every other case here
+  // passes an offset-less string, which `new Date(...)` parses as local time and would hide a
+  // regression that mishandled the wire format's timezone conversion. jest.setup.tz.js pins the
+  // runner to UTC so this assertion is deterministic across machines.
+  it("handles the Z-suffixed UTC format the API actually sends", () => {
+    const utcNow = new Date("2026-09-03T20:00:00Z");
+    expect(formatEntryTime("2026-09-03T14:32:00Z", utcNow)).toBe("Today, 14:32");
+  });
 });

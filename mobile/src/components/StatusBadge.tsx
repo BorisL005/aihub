@@ -17,11 +17,17 @@ const STATUS_COLOR: Record<ValidationStatus, { fg: string; bg: string }> = {
   extracted: { fg: colors.positive, bg: colors.positiveTint },
 };
 
+// `validation_status` has no DB-level CHECK constraint yet (follow-up ticket), so a value outside
+// the closed union is reachable at runtime despite the TS type - fall back rather than crash the
+// row, the same defensive posture SourceIndicator takes for `source`.
+const UNKNOWN_COLOR = { fg: colors.inkMuted, bg: colors.sunk };
+const UNKNOWN_LABEL = "Unknown status";
+
 export function StatusBadge({ status }: { status: ValidationStatus }) {
-  const { fg, bg } = STATUS_COLOR[status];
+  const { fg, bg } = STATUS_COLOR[status] ?? UNKNOWN_COLOR;
   return (
     <View style={[styles.badge, { backgroundColor: bg }]} testID="status-badge">
-      <Text style={[styles.label, { color: fg }]}>{STATUS_LABEL[status]}</Text>
+      <Text style={[styles.label, { color: fg }]}>{STATUS_LABEL[status] ?? UNKNOWN_LABEL}</Text>
     </View>
   );
 }

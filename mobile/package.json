@@ -6,7 +6,7 @@
   "scripts": {
     "start": "expo start",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "TZ=UTC jest"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",

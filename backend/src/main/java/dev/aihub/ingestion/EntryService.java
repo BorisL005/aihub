@@ -33,7 +33,7 @@ public class EntryService {
         }
 
         EntryCursor cursor = rawCursor == null ? null : EntryCursor.decode(rawCursor);
-        EntryRepository.Page page = entryRepository.findPage(projectId, limit, cursor);
+        EntryRepository.Page page = entryRepository.findPage(projectId, user.userId(), limit, cursor);
 
         List<EntryResponse> items = page.items().stream()
                 .map(row -> new EntryResponse(

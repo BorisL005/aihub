@@ -9,6 +9,8 @@ import dev.aihub.support.AbstractIntegrationTest;
 import dev.aihub.support.TestJwtSupport;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import org.jooq.JSONB;
 import org.junit.jupiter.api.Test;
@@ -55,15 +57,35 @@ class EntriesControllerIntegrationTest extends AbstractIntegrationTest {
                 .jsonPath("$.nextCursor").exists()
                 .returnResult()
                 .getResponseBody();
-        String cursor = JsonPath.read(new String(firstPageBody, StandardCharsets.UTF_8), "$.nextCursor");
+        String firstPageJson = new String(firstPageBody, StandardCharsets.UTF_8);
+        List<String> firstPageTimestamps = JsonPath.read(firstPageJson, "$.items[*].ts");
+        String cursor = JsonPath.read(firstPageJson, "$.nextCursor");
 
-        restTestClient.get().uri("/projects/{id}/entries?limit=20&cursor={cursor}", projectId, cursor)
+        byte[] secondPageBody = restTestClient.get().uri("/projects/{id}/entries?limit=20&cursor={cursor}", projectId, cursor)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.items.length()").isEqualTo(5)
-                .jsonPath("$.nextCursor").doesNotExist();
+                .jsonPath("$.nextCursor").doesNotExist()
+                .returnResult()
+                .getResponseBody();
+        List<String> secondPageTimestamps =
+                JsonPath.read(new String(secondPageBody, StandardCharsets.UTF_8), "$.items[*].ts");
+
+        // Ordered by ts descending (AC-4): page 1's timestamps must be strictly decreasing, and
+        // every timestamp on page 2 must be older than every timestamp on page 1 - this fails if
+        // EntryRepository.findPage's orderBy is flipped or dropped, which count-only assertions
+        // cannot detect.
+        List<OffsetDateTime> firstPageOrder =
+                firstPageTimestamps.stream().map(OffsetDateTime::parse).toList();
+        assertThat(firstPageOrder).isSortedAccordingTo(Comparator.reverseOrder());
+        OffsetDateTime oldestOnFirstPage = firstPageOrder.getLast();
+        OffsetDateTime newestOnSecondPage = secondPageTimestamps.stream()
+                .map(OffsetDateTime::parse)
+                .max(Comparator.naturalOrder())
+                .orElseThrow();
+        assertThat(newestOnSecondPage).isBefore(oldestOnFirstPage);
     }
 
     // AC-4 (cursor precision): entries sharing a timestamp across a page boundary must not be
@@ -72,7 +94,10 @@ class EntriesControllerIntegrationTest extends AbstractIntegrationTest {
     void listEntriesDoesNotSkipEntriesSharingTheSameTimestampAcrossAPageBoundary() {
         String userId = uniqueUserId();
         UUID projectId = provisionProject(userId);
-        OffsetDateTime sharedTs = OffsetDateTime.now();
+        // A literal, non-round timestamp (not OffsetDateTime.now()) so the cursor-truncation bug
+        // this test guards against can't pass by chance on a now() value that happens to be
+        // millisecond-aligned.
+        OffsetDateTime sharedTs = OffsetDateTime.parse("2026-01-15T10:30:00.123456789Z");
         for (int i = 0; i < 3; i++) {
             insertEntry(projectId, sharedTs, "camera", "pending");
         }

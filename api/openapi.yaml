@@ -113,6 +113,11 @@ components:
         instance:
           type: string
           format: uri
+      required:
+        - type
+        - title
+        - status
+        - detail
 
     Project:
       type: object

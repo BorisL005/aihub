@@ -90,12 +90,17 @@ class EntriesEdgeCaseIntegrationTest extends AbstractIntegrationTest {
     // unhandled 500.
     @Test
     void listProjectsRejectsJwtWithNoSubjectClaimAndProvisionsNothing() {
+        // projects.user_id is NOT NULL (V1 migration), so a row can never carry a null user_id -
+        // isNull() would always read zero and prove nothing. A before/after total-count snapshot
+        // is the assertion that actually fails if the rejected request still provisioned a row.
+        int projectCountBefore = dsl.fetchCount(Projects.TABLE);
+
         restTestClient.get().uri("/projects")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.noSubjectToken())
                 .exchange()
                 .expectStatus().isUnauthorized();
 
-        assertThat(dsl.fetchCount(Projects.TABLE, Projects.USER_ID.isNull())).isZero();
+        assertThat(dsl.fetchCount(Projects.TABLE)).isEqualTo(projectCountBefore);
     }
 
     // AC-2 edge case, entries endpoint: the no-`sub` fix (SubjectValidator) is wired once at the
@@ -106,7 +111,7 @@ class EntriesEdgeCaseIntegrationTest extends AbstractIntegrationTest {
     // /projects - it would silently 404, which still violates AC-2's "response is 401" contract
     // but is a different failure shape and could hide behind AC-5/AC-S's identical 404 body.
     @Test
-    void listEntriesRejectsJwtWithNoSubjectClaimAndProvisionsNothing() {
+    void listEntriesRejectsJwtWithNoSubjectClaim() {
         String userId = uniqueUserId();
         UUID projectId = provisionProject(userId);
 
