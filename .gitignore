@@ -9,3 +9,4 @@ deploy/secrets/
 evals/extraction/receipts/*
 !evals/extraction/receipts/README.md
 .claude/worktrees/
+.claude/worktrees/
