@@ -6,3 +6,5 @@ target/
 *.iml
 .DS_Store
 deploy/secrets/
+evals/extraction/receipts/*
+!evals/extraction/receipts/README.md
