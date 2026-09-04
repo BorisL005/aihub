@@ -7,6 +7,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import dev.aihub.security.AudienceValidator;
+import dev.aihub.security.SubjectValidator;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -42,7 +43,9 @@ public class TestJwtSupport {
         NimbusJwtDecoder decoder =
                 NimbusJwtDecoder.withPublicKey((RSAPublicKey) KEY_PAIR.getPublic()).build();
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
-                JwtValidators.createDefaultWithIssuer(TEST_ISSUER), new AudienceValidator(TEST_AUDIENCE));
+                JwtValidators.createDefaultWithIssuer(TEST_ISSUER),
+                new AudienceValidator(TEST_AUDIENCE),
+                new SubjectValidator());
         decoder.setJwtValidator(validator);
         return decoder;
     }

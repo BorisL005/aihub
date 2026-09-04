@@ -44,9 +44,11 @@ public class SecurityConfig {
      * oauth2ResourceServer} fails fast at startup rather than silently accepting unvalidated
      * tokens.
      *
-     * <p>Validates issuer, expiry and audience. Audience matters because Auth0 issues access
-     * tokens per-API within a tenant: signature and issuer alone don't distinguish a token minted
-     * for this API from one minted for a different API in the same tenant.
+     * <p>Validates issuer, expiry, audience and subject presence. Audience matters because Auth0
+     * issues access tokens per-API within a tenant: signature and issuer alone don't distinguish a
+     * token minted for this API from one minted for a different API in the same tenant. Subject
+     * presence matters because {@link AuthenticatedUser#from} feeds it straight into {@code
+     * user_id}, which every tenant table requires.
      */
     @Bean
     @ConditionalOnProperty(prefix = "auth0", name = "issuer-uri")
@@ -56,7 +58,9 @@ public class SecurityConfig {
 
         NimbusJwtDecoder decoder = (NimbusJwtDecoder) JwtDecoders.fromIssuerLocation(issuerUri);
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
-                JwtValidators.createDefaultWithIssuer(issuerUri), new AudienceValidator(audience));
+                JwtValidators.createDefaultWithIssuer(issuerUri),
+                new AudienceValidator(audience),
+                new SubjectValidator());
         decoder.setJwtValidator(validator);
         return decoder;
     }
