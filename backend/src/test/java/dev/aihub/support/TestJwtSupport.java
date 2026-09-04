@@ -75,6 +75,30 @@ public class TestJwtSupport {
                 Instant.now().plusSeconds(300));
     }
 
+    /**
+     * A validly-signed, non-expired, correct-issuer/audience token that simply carries no
+     * {@code sub} claim at all - distinct from an empty-string subject. Auth0-issued tokens
+     * always carry one, but nothing in {@code SecurityConfig}/{@code JwtValidators} requires its
+     * presence, so this is reachable by any other correctly-configured OAuth2 issuer or a
+     * misconfigured one. QA edge-case probe for AC-2 / AC-9 (see
+     * ingestion.EntriesEdgeCaseIntegrationTest / ProjectsEdgeCaseIntegrationTest).
+     */
+    public static String noSubjectToken() {
+        JWTClaimsSet claims = new JWTClaimsSet.Builder()
+                .issuer(TEST_ISSUER)
+                .audience(List.of(TEST_AUDIENCE))
+                .issueTime(Date.from(Instant.now().minusSeconds(5)))
+                .expirationTime(Date.from(Instant.now().plusSeconds(300)))
+                .build();
+        SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claims);
+        try {
+            jwt.sign(new RSASSASigner(KEY_PAIR.getPrivate()));
+        } catch (JOSEException e) {
+            throw new IllegalStateException(e);
+        }
+        return jwt.serialize();
+    }
+
     private static String token(
             String subject, String issuer, String audience, Instant issuedAt, Instant expiresAt) {
         JWTClaimsSet claims = new JWTClaimsSet.Builder()
