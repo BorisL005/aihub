@@ -26,13 +26,13 @@ describe("ReceiptsListScreen", () => {
   });
 
   // AC-8: loading state
-  it("shows the loading skeleton while the initial request is in flight", () => {
+  it("shows the loading skeleton while the initial request is in flight", async () => {
     mockedUseApiClient.mockReturnValue({
       listProjects: () => new Promise(() => {}),
       listProjectEntries: () => new Promise(() => {}),
     });
 
-    renderScreen();
+    await renderScreen();
 
     expect(screen.getByTestId("loading-state")).toBeTruthy();
   });
@@ -42,12 +42,12 @@ describe("ReceiptsListScreen", () => {
     const listProjects = jest.fn().mockRejectedValue(new Error("network down"));
     mockedUseApiClient.mockReturnValue({ listProjects, listProjectEntries: jest.fn() });
 
-    renderScreen();
+    await renderScreen();
 
     await waitFor(() => expect(screen.getByTestId("error-state")).toBeTruthy());
     expect(screen.getByText("Couldn't load your receipts")).toBeTruthy();
 
-    fireEvent.press(screen.getByText("Try again"));
+    await fireEvent.press(screen.getByText("Try again"));
     await waitFor(() => expect(listProjects).toHaveBeenCalledTimes(2));
   });
 
@@ -58,7 +58,7 @@ describe("ReceiptsListScreen", () => {
       listProjectEntries: jest.fn().mockResolvedValue({ items: [] }),
     });
 
-    renderScreen();
+    await renderScreen();
 
     await waitFor(() => expect(screen.getByTestId("empty-state")).toBeTruthy());
     expect(screen.getByText("No receipts yet")).toBeTruthy();
@@ -91,7 +91,7 @@ describe("ReceiptsListScreen", () => {
       }),
     });
 
-    renderScreen();
+    await renderScreen();
 
     await waitFor(() => expect(screen.getAllByTestId("entry-row")).toHaveLength(2));
     expect(screen.getByText("Not read yet")).toBeTruthy();
