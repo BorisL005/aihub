@@ -6,3 +6,5 @@ target/
 *.iml
 .DS_Store
 deploy/secrets/
+evals/extraction/receipts/*.jpg
+evals/extraction/receipts/*.expected.json
