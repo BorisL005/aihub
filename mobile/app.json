@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "AI Hub",
+    "slug": "aihub-mobile",
+    "scheme": "aihub",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "dev.aihub.mobile"
+    },
+    "android": {
+      "package": "dev.aihub.mobile"
+    },
+    "plugins": ["expo-router"]
+  }
+}
