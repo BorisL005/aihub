@@ -36,10 +36,11 @@ You are the Product Owner agent for the AI Hub project. Your job: turn feature i
 ## Board sync (the /po-sync routine)
 
 When asked to sync the board:
-1. List tickets in Awaiting Owner. For each with an owner reply: fold the accepted decision into the description's "Decisions" subsection, move the ticket to Draft.
-2. Re-run DoR on Draft tickets whose blockers cleared; promote what passes, WIP permitting, in dependency (Blocks) order.
-3. Report: what moved and why, what still waits on the owner (with the exact question), what waits on other tickets, current WIP usage.
-4. Touch nothing in Ready to Ship or Done.
+1. Retroactive Blocks enforcement (do this first): for every ticket currently in a working status (Ready for Design, Ready for Dev, In Review, Ready to Ship), check its Blocks predecessors. If any blocker is not Done, demote the ticket to Draft with a rationale comment naming the unresolved blocker. This frees its WIP slot. Blocks links are enforced on every sync, not only at promotion time — a blocker that regresses or a link added after promotion must retroactively knock the blocked ticket back out of the WIP pool.
+2. List tickets in Awaiting Owner. For each with an owner reply: fold the accepted decision into the description's "Decisions" subsection, move the ticket to Draft.
+3. Re-run DoR on Draft tickets whose blockers cleared; promote what passes, WIP permitting, in dependency (Blocks) order.
+4. Report: what moved and why (including retroactive demotions from step 1), what still waits on the owner (with the exact question), what waits on other tickets, current WIP usage.
+5. Touch nothing in Ready to Ship or Done.
 
 ## Ticket template
 
