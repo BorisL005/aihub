@@ -170,3 +170,54 @@ test('AC-3: CLI exits zero on a valid set', () => {
     cleanup(dir);
   }
 });
+
+test('AC-8/AC-3 owner ruling: the validation step writes a failure report file naming exactly ' +
+  'what is missing or mismatched, so the job can end red with that report attached even though ' +
+  'the comparison step never runs', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '013.jpg'));
+    fs.writeFileSync(path.join(dir, '009.expected.json'), '{ not valid json ');
+
+    const reportPath = path.join(dir, 'validation-report.txt');
+    const proc = spawnSync('node', [CLI_PATH, dir, reportPath], { encoding: 'utf8' });
+
+    assert.notEqual(proc.status, 0);
+    assert.ok(fs.existsSync(reportPath), 'a failure must write a report file');
+    const report = fs.readFileSync(reportPath, 'utf8');
+    assert.match(report, /013.*013\.jpg/s);
+    assert.match(report, /009\.expected\.json/);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8/AC-3 owner ruling: the failure report defaults into the validated directory itself, ' +
+  'and does not then count itself as an orphan on a later run', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '013.jpg'));
+    const first = spawnSync('node', [CLI_PATH, dir], { encoding: 'utf8' });
+    assert.notEqual(first.status, 0);
+    assert.ok(fs.existsSync(path.join(dir, 'validation-report.txt')));
+
+    fs.writeFileSync(path.join(dir, '013.jpg'), Buffer.from([0xff, 0xd8, 0xff]));
+    const result = validatePairs(dir);
+    assert.equal(result.ok, true, 'a leftover validation-report.txt from a prior failed run must not itself be flagged as an orphan');
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8/AC-3 owner ruling: a directory alongside the fixtures matching the allowed "scripts" ' +
+  'name is not treated as an orphan (the eval scripts live next to the synced fixtures)', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.mkdirSync(path.join(dir, 'scripts'));
+    fs.writeFileSync(path.join(dir, 'scripts', 'validate-pairs.js'), '// stub\n');
+    const result = validatePairs(dir);
+    assert.equal(result.ok, true);
+  } finally {
+    cleanup(dir);
+  }
+});

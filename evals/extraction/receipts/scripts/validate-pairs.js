@@ -1,14 +1,22 @@
 #!/usr/bin/env node
 // Validates the receipt eval fixture directory: exactly 24 complete NNN.jpg +
 // NNN.expected.json pairs (001-024), no orphans, no malformed JSON.
-// Exits non-zero on any problem, naming the specific NNN/file at fault.
+// Exits non-zero on any problem, naming the specific NNN/file at fault, and
+// writes the same failure detail to a report file (AC-8/AC-3 owner ruling:
+// a validation failure must fail the job before extraction/comparison ever
+// runs, but must fail loudly — this step owns producing that report, since
+// the comparison step never gets to run against an incomplete set).
 'use strict';
 
 const fs = require('node:fs');
 const path = require('node:path');
 
 const EXPECTED_COUNT = 24;
-const ALLOWED_EXTRA_FILES = new Set(['MANIFEST.md', 'MANIFEST-002.md', 'README.md']);
+const REPORT_FILE_NAME = 'validation-report.txt';
+const ALLOWED_EXTRA_FILES = new Set(['MANIFEST.md', 'MANIFEST-002.md', 'README.md', REPORT_FILE_NAME]);
+// The eval scripts themselves live alongside the synced fixtures in the same
+// directory that gets validated — not an orphan, just where this tool lives.
+const ALLOWED_EXTRA_DIRS = new Set(['scripts']);
 
 function pad3(n) {
   return String(n).padStart(3, '0');
@@ -27,7 +35,10 @@ function validatePairs(dir) {
 
   const entries = fs.readdirSync(dir).filter((name) => {
     const full = path.join(dir, name);
-    return fs.statSync(full).isFile();
+    if (fs.statSync(full).isDirectory()) {
+      return !ALLOWED_EXTRA_DIRS.has(name);
+    }
+    return true;
   });
 
   if (entries.length === 0) {
@@ -79,23 +90,28 @@ function validatePairs(dir) {
 function main() {
   const dir = process.argv[2];
   if (!dir) {
-    console.error('usage: validate-pairs.js <eval-dir>');
+    console.error('usage: validate-pairs.js <eval-dir> [report-path]');
     process.exit(1);
   }
+  const reportPath = process.argv[3] || path.join(dir, REPORT_FILE_NAME);
 
   const result = validatePairs(dir);
   if (!result.ok) {
-    console.error(`receipt eval set validation FAILED (${result.problems.length} problem(s)):`);
-    for (const problem of result.problems) {
-      console.error(`  - ${problem}`);
-    }
+    const reportLines = [
+      `receipt eval set validation FAILED (${result.problems.length} problem(s)):`,
+      ...result.problems.map((problem) => `  - ${problem}`),
+    ];
+    const report = reportLines.join('\n');
+    console.error(report);
+    fs.writeFileSync(reportPath, `${report}\n`);
+    console.error(`validation failure report written to ${reportPath}`);
     process.exit(1);
   }
 
   console.log(`receipt eval set validation OK: ${EXPECTED_COUNT} complete pairs found in ${dir}`);
 }
 
-module.exports = { validatePairs, EXPECTED_COUNT, ALLOWED_EXTRA_FILES };
+module.exports = { validatePairs, EXPECTED_COUNT, ALLOWED_EXTRA_FILES, ALLOWED_EXTRA_DIRS, REPORT_FILE_NAME };
 
 if (require.main === module) {
   main();

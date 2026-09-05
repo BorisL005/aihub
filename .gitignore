@@ -10,3 +10,4 @@ evals/extraction/receipts/*.jpg
 evals/extraction/receipts/*.expected.json
 evals/extraction/receipts/MANIFEST.md
 evals/extraction/receipts/MANIFEST-002.md
+evals/extraction/receipts/validation-report.txt

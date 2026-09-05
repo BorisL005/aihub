@@ -59,33 +59,53 @@ test('AC-3: the job never skips or soft-passes past a validation failure (no con
   assert.doesNotMatch(yaml, /\|\|\s*true/);
 });
 
-test('AC-8: the report is produced on a validation failure too, not just success or an ' +
-  'in-run-eval failure (a hard "Validate synced eval set" failure must not silently skip ' +
-  'the "Run per-pair comparison"/report step)', () => {
+test('AC-8/AC-3 owner ruling: a validation failure must fail the job BEFORE the comparison ' +
+  'step runs — the "Run per-pair comparison" step gets no `if: always()` (or equivalent), so ' +
+  'it stays skipped whenever validation fails, rather than running extraction/comparison ' +
+  'against an incomplete or invalid set', () => {
   const yaml = readWorkflow();
 
   const compareStepMatch = yaml.match(/- name: Run per-pair comparison[\s\S]*?(?=\n\s{2,6}- name:|\n*$)/);
   assert.ok(compareStepMatch, 'workflow must have a "Run per-pair comparison" step');
 
-  // AC-8 requires a report "when it completes (success or failure)". The
-  // only failure paths currently proven by run-eval.test.js are inside
-  // run-eval.js's own execution (a per-pair extractor throw, a bad
-  // EXTRACTOR_MODULE). But the far more common "failure" — the "Validate
-  // synced eval set" step (AC-3) exiting non-zero — is never exercised
-  // end-to-end at the workflow level: GitHub Actions steps stop on the
-  // first failure by default, and this step has no `if: always()` (or
-  // similar), so "Run per-pair comparison" — and therefore any report at
-  // all — is skipped entirely whenever AC-3 fires. That contradicts AC-8's
-  // literal "on completion, success or failure" language.
-  assert.match(
+  assert.doesNotMatch(
     compareStepMatch[0],
     /if:\s*always\(\)/,
-    'the "Run per-pair comparison" step has no `if: always()` (or equivalent), so a validate-pairs.js ' +
-      'failure (AC-3) skips this step and the job produces NO report at all — contradicting AC-8\'s ' +
-      '"on completion (success or failure)" requirement. Flagged in the PR as needing a PO ruling on ' +
-      'whether AC-3\'s "never continues past this point" should still win; until that ruling lands, ' +
-      'AC-8 is not met for the validation-failure case.'
+    'the "Run per-pair comparison" step must never run after a validation failure — no ' +
+      '`if: always()` (or equivalent) — per the owner\'s AC-8/AC-3 ruling that partial metrics ' +
+      'on an incomplete set must never be reported'
   );
+});
+
+test('AC-8/AC-3 owner ruling: the validation step itself must own producing a failure report ' +
+  '(not the comparison step), and that report must be uploaded as a build artifact so the ' +
+  'job still ends red with the report attached', () => {
+  const yaml = readWorkflow();
+
+  const validateStepMatch = yaml.match(/- name: Validate synced eval set[\s\S]*?(?=\n\s{2,6}- name:|\n*$)/);
+  assert.ok(validateStepMatch, 'workflow must have a "Validate synced eval set" step');
+  assert.match(
+    validateStepMatch[0],
+    /id:\s*validate/,
+    'the validate step needs an id so a later step can key off its outcome'
+  );
+
+  const uploadStepMatch = yaml.match(/- name: Upload validation failure report[\s\S]*?(?=\n\s{2,6}- name:|\n*$)/);
+  assert.ok(uploadStepMatch, 'workflow must have a step that uploads the validation failure report');
+  assert.match(
+    uploadStepMatch[0],
+    /if:.*steps\.validate\.outcome\s*==\s*['"]failure['"]/,
+    'the upload step must be gated specifically on the validate step\'s own failure, not on any ' +
+      'earlier step (e.g. a sync failure) failing'
+  );
+  assert.match(uploadStepMatch[0], /actions\/upload-artifact@v/);
+  assert.match(uploadStepMatch[0], /path:\s*evals\/extraction\/receipts\/validation-report\.txt/);
+
+  // the upload step must appear before the comparison step in the job, so
+  // the report is attached even though the comparison step never runs
+  const uploadIndex = yaml.indexOf('- name: Upload validation failure report');
+  const compareIndex = yaml.indexOf('- name: Run per-pair comparison');
+  assert.ok(uploadIndex > -1 && compareIndex > -1 && uploadIndex < compareIndex);
 });
 
 test('KAN-9: this ticket adds a separate job and does not touch the build-and-test job', () => {

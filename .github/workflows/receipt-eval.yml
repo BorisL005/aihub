@@ -34,8 +34,22 @@ jobs:
         run: aws s3 sync s3://aihub-evals/receipts/ . --endpoint-url "$R2_ENDPOINT"
 
       - name: Validate synced eval set
+        id: validate
         working-directory: evals/extraction/receipts
         run: node scripts/validate-pairs.js .
+
+      # AC-8/AC-3 owner ruling: a validation failure must fail the job before
+      # extraction/comparison ever runs (partial metrics on an incomplete set
+      # would lie) - so this step never gets an `if: always()`. Instead the
+      # validation step above owns writing the failure report, and this step
+      # attaches it so the job still ends red with the report visible.
+      - name: Upload validation failure report
+        if: failure() && steps.validate.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: receipt-eval-validation-report
+          path: evals/extraction/receipts/validation-report.txt
+          if-no-files-found: error
 
       - name: Run per-pair comparison
         working-directory: evals/extraction/receipts
