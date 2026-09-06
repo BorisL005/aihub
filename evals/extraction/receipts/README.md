@@ -30,6 +30,10 @@ this `README.md`, the validator's own `validation-report.txt` failure report, an
 `scripts/` directory (where these eval scripts live) are not fixture files and are
 excluded from the pairing check.
 
+Reference JSONs follow the `receipts` project_type payload schema used by KAN-4:
+`merchant`, `purchased_at` (YYYY-MM-DD), `total`, `currency`, optional `tax_total`,
+`payment_method`, `line_items[]`.
+
 ## Annotation convention
 
 Any key prefixed with `_` in an `NNN.expected.json` is annotation metadata for a human
@@ -49,4 +53,5 @@ is excluded from field-by-field comparison.
 ## Current set
 
 24 pairs (`001`-`024`, batches 001-002). Batch 003 (Polish fiscal, handwritten, non-CAD,
-long grocery lists) is an outstanding owner TODO toward the 30-50 target.
+long grocery lists) is an outstanding owner TODO toward the 30-50 target. An empty or
+missing set is a FAIL for gated tickets, never a skip.

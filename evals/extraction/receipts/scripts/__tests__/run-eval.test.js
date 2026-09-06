@@ -7,7 +7,7 @@ const { spawnSync } = require('node:child_process');
 
 const { runEval, loadExtractor } = require('../run-eval');
 const stubExtractor = require('../extractor');
-const { makeValidFixtureSet, cleanup } = require('./test-helpers');
+const { makeValidFixtureSet, cleanup } = require('./helpers');
 
 const PERFECT_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-perfect.js');
 const DUPLICATE_020_EXTRACTOR = path.join(__dirname, 'fixtures', 'mock-extractor-duplicate-020.js');

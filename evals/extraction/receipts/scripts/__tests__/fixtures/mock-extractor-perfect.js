@@ -1,5 +1,5 @@
 // AC-9 fixture: a "wired" extractor that always returns a perfect match
-// for the synthetic fixture set built by test-helpers.makeValidFixtureSet
+// for the synthetic fixture set built by helpers.makeValidFixtureSet
 // (merchant: `Merchant ${nnn}`, total: 10 + index, currency: 'CAD').
 'use strict';
 

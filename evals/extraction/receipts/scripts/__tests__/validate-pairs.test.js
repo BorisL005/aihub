@@ -7,7 +7,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const { validatePairs } = require('../validate-pairs');
-const { makeValidFixtureSet, cleanup } = require('./test-helpers');
+const { makeValidFixtureSet, cleanup } = require('./helpers');
 
 const CLI_PATH = path.join(__dirname, '..', 'validate-pairs.js');
 
