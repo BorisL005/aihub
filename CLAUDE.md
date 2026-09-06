@@ -35,3 +35,6 @@ Personal tracker app (receipts, workouts, car maintenance) built by AI agents un
 - Backend: `cd backend && ./mvnw verify` (Testcontainers needs Docker running)
 - Mobile: `cd mobile && npx expo start`
 - Board: `/po-sync`; design: `/design-ticket KAN-n`; review: `/review <pr>`; QA: `/qa <pr>`
+
+## Known environment quirks
+- On this workstation, plain `npm install`/`npm ci` in `mobile/` hangs or times out: DNS resolves `registry.npmjs.org` to IPv6-only addresses and IPv6 to it resets immediately here. Fix: prefix with `NODE_OPTIONS=--dns-result-order=ipv4first` (e.g. `NODE_OPTIONS=--dns-result-order=ipv4first npm ci`). Not an npm registry flakiness issue - don't just retry.
