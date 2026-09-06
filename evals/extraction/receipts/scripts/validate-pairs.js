@@ -15,10 +15,13 @@ const EXPECTED_COUNT = 24;
 const REPORT_FILE_NAME = 'validation-report.txt';
 const ALLOWED_EXTRA_FILES = new Set(['README.md', REPORT_FILE_NAME]);
 // Manifest files are named MANIFEST.md, MANIFEST-002.md, MANIFEST-003.md, ...
-// as new batches arrive from the private R2 bucket. Match the convention,
-// not an enumerated list of today's filenames — see .gitignore, which uses
-// the same pattern so a future manifest is never both leaked (untracked
-// there) and orphaned (unrecognized here).
+// as new batches arrive from the private R2 bucket. .gitignore uses the
+// broader glob MANIFEST*.md (safer to over-ignore than risk committing a
+// real manifest); this pattern is deliberately narrower so a stray file
+// that merely starts with "MANIFEST" (a typo, an unrelated file) still
+// fails validation loudly instead of being silently treated as a batch
+// manifest. The asymmetry is intentional, not drift — see the two tests
+// below ("MANIFEST-003.md" vs "MANIFESTO.md").
 const MANIFEST_FILE_PATTERN = /^MANIFEST(-\d+)?\.md$/;
 // The eval scripts themselves live alongside the synced fixtures in the same
 // directory that gets validated — not an orphan, just where this tool lives.

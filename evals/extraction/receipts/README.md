@@ -43,7 +43,9 @@ is excluded from field-by-field comparison.
 ## Eval semantics
 
 - `total` is always the grand total actually paid, tips and cash-rounding included — never a
-  subtotal or pre-tip figure. See `MANIFEST.md`/`MANIFEST-002.md` "tip trap" cases.
+  subtotal or pre-tip figure. Receipts 002, 004, 007, 008, 009, 012, 014, 017, 020, 022, 024
+  exist specifically to test this ("tip trap" cases) — see `MANIFEST.md`/`MANIFEST-002.md`
+  for the per-receipt notes.
 - `019` is a designated `needs_review` case (`_expected_outcome`): the merchant is unreadable
   (logo only). A confidently produced merchant name from extraction is scored as a miss, not
   a match — a hallucinated answer is never rewarded.
