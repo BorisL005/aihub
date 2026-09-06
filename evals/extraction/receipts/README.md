@@ -4,11 +4,12 @@ Pairs: `NNN.jpg` + `NNN.expected.json` (reference extraction). Target: 30-50 rea
 incl. crumpled, handwritten, and Polish fiscal (comma decimals). Run on every prompt/model change.
 
 Fixture files (`*.jpg`, `*.expected.json`) are gitignored — they are not committed.
-`MANIFEST.md` and `MANIFEST-002.md` are also gitignored: they are private R2 bucket
-contents (owner spend history) and must never be committed to this public repo, even
-though CI reads their names for the pairing check below. They arrive locally the same
-way the fixtures do — via the R2 sync. This `README.md`, and the `scripts/` directory,
-are the only tracked contents of this directory.
+Any `MANIFEST*.md` file (`MANIFEST.md`, `MANIFEST-002.md`, and any future batch's
+`MANIFEST-NNN.md`) is also gitignored: these are private R2 bucket contents (owner
+spend history) and must never be committed to this public repo, even though CI reads
+them for the pairing check below. They arrive locally the same way the fixtures do —
+via the R2 sync. This `README.md`, and the `scripts/` directory, are the only tracked
+contents of this directory.
 
 ## Source of truth
 
@@ -24,8 +25,10 @@ Authenticated via repository secrets `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECR
 ## Pairing convention
 
 Every `NNN` from `001` to the current set size must have both `NNN.jpg` and a valid
-`NNN.expected.json`. No orphaned or unpaired files. `MANIFEST.md`, `MANIFEST-002.md`, and
-this `README.md` are not fixture files and are excluded from the pairing check.
+`NNN.expected.json`. No orphaned or unpaired files. Any `MANIFEST*.md` batch manifest,
+this `README.md`, the validator's own `validation-report.txt` failure report, and the
+`scripts/` directory (where these eval scripts live) are not fixture files and are
+excluded from the pairing check.
 
 ## Annotation convention
 

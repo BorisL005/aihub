@@ -52,6 +52,13 @@ async function runEval(dir, extractor) {
     let entries;
     try {
       entries = await extractor.extract(jpgPath);
+      // Per-pair isolation (AC-8) covers a malformed extractor return the
+      // same way it covers a thrown error: a contract violation on one pair
+      // (e.g. forgetting to wrap a single result in an array) must not
+      // collapse all 24 pairs into "run aborted before evaluation".
+      if (!Array.isArray(entries)) {
+        throw new TypeError(`extractor returned ${typeof entries}, expected an array`);
+      }
     } catch (err) {
       results.push({ id: nnn, status: 'mismatch', detail: `extractor error: ${err.message}` });
       continue;

@@ -13,10 +13,20 @@ const path = require('node:path');
 
 const EXPECTED_COUNT = 24;
 const REPORT_FILE_NAME = 'validation-report.txt';
-const ALLOWED_EXTRA_FILES = new Set(['MANIFEST.md', 'MANIFEST-002.md', 'README.md', REPORT_FILE_NAME]);
+const ALLOWED_EXTRA_FILES = new Set(['README.md', REPORT_FILE_NAME]);
+// Manifest files are named MANIFEST.md, MANIFEST-002.md, MANIFEST-003.md, ...
+// as new batches arrive from the private R2 bucket. Match the convention,
+// not an enumerated list of today's filenames — see .gitignore, which uses
+// the same pattern so a future manifest is never both leaked (untracked
+// there) and orphaned (unrecognized here).
+const MANIFEST_FILE_PATTERN = /^MANIFEST(-\d+)?\.md$/;
 // The eval scripts themselves live alongside the synced fixtures in the same
 // directory that gets validated — not an orphan, just where this tool lives.
 const ALLOWED_EXTRA_DIRS = new Set(['scripts']);
+
+function isAllowedExtraFile(name) {
+  return ALLOWED_EXTRA_FILES.has(name) || MANIFEST_FILE_PATTERN.test(name);
+}
 
 function pad3(n) {
   return String(n).padStart(3, '0');
@@ -73,11 +83,11 @@ function validatePairs(dir) {
   }
 
   for (const name of remaining) {
-    if (ALLOWED_EXTRA_FILES.has(name)) continue;
+    if (isAllowedExtraFile(name)) continue;
     problems.push(`orphaned/unexpected file with no matching pair: ${name}`);
   }
 
-  const pairFileCount = entries.filter((name) => !ALLOWED_EXTRA_FILES.has(name)).length;
+  const pairFileCount = entries.filter((name) => !isAllowedExtraFile(name)).length;
   if (pairFileCount !== EXPECTED_COUNT * 2) {
     problems.push(
       `expected exactly ${EXPECTED_COUNT} pairs (${EXPECTED_COUNT * 2} files), found ${pairFileCount} fixture file(s)`
@@ -111,7 +121,15 @@ function main() {
   console.log(`receipt eval set validation OK: ${EXPECTED_COUNT} complete pairs found in ${dir}`);
 }
 
-module.exports = { validatePairs, EXPECTED_COUNT, ALLOWED_EXTRA_FILES, ALLOWED_EXTRA_DIRS, REPORT_FILE_NAME };
+module.exports = {
+  validatePairs,
+  EXPECTED_COUNT,
+  ALLOWED_EXTRA_FILES,
+  MANIFEST_FILE_PATTERN,
+  isAllowedExtraFile,
+  ALLOWED_EXTRA_DIRS,
+  REPORT_FILE_NAME,
+};
 
 if (require.main === module) {
   main();

@@ -119,9 +119,8 @@ test('AC-3: absent directory fails', () => {
 });
 
 test('QA edge case: a stray subdirectory (e.g. a botched R2 sync nesting receipts/receipts/) ' +
-  'is silently ignored rather than flagged — validatePairs only inspects top-level files, so an ' +
-  'unexpected directory (and anything inside it) never trips the "no extra/unnumbered/unpaired ' +
-  'files" check from AC-2/AC-3', () => {
+  'is flagged as an orphan by the "no extra/unnumbered/unpaired files" check from AC-2/AC-3 — ' +
+  'only the allowed "scripts" directory is exempt', () => {
   const dir = makeValidFixtureSet(24);
   try {
     fs.mkdirSync(path.join(dir, 'stray-subdir'));
@@ -144,6 +143,35 @@ test('AC-3: README/MANIFEST files are ignored, not treated as orphans', () => {
   try {
     const result = validatePairs(dir);
     assert.equal(result.ok, true);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('M1: a future MANIFEST-003.md (matching the MANIFEST*.md pattern shared with .gitignore, ' +
+  'not an enumerated filename) is ignored by validation, not treated as an orphan', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.writeFileSync(path.join(dir, 'MANIFEST-003.md'), '# batch 3 (Polish fiscal)\n');
+    const result = validatePairs(dir);
+    assert.equal(
+      result.ok,
+      true,
+      'a MANIFEST-003.md-style file must not be reported as an orphan or thrown off the pair count'
+    );
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('M1: a file that only starts with "MANIFEST" but does not match the MANIFEST(-NNN).md ' +
+  'pattern is still flagged as an orphan (the pattern is not a bare prefix check)', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.writeFileSync(path.join(dir, 'MANIFESTO.md'), 'not a manifest\n');
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('MANIFESTO.md')));
   } finally {
     cleanup(dir);
   }
