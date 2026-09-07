@@ -87,6 +87,85 @@ paths:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
 
+    post:
+      operationId: createEntry
+      summary: Claim an uploaded media_ref as a new entry
+      description: >-
+        Verifies media_ref was issued to the caller by POST /media/upload-url and that an object
+        now exists at it in R2, then creates one entries row with source "camera" and validation
+        status "pending". idempotencyKey is client-generated per capture; retrying with the same
+        key on the same project returns the original entry instead of creating a second one.
+      tags: [projects]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateEntryRequest"
+      responses:
+        "201":
+          description: A new entry was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entry"
+        "200":
+          description: >-
+            idempotencyKey matches a request already processed for this project; the original
+            entry (AC-3), not a new one.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entry"
+        "400":
+          description: >-
+            Either the uploaded object fails the content-type/size check (ProblemDetail.type
+            "urn:aihub:media-rejected" - not retryable, the client shows "take another photo")
+            or media_ref is unknown, not owned by the caller, already claimed, or has no object
+            in R2 yet (ProblemDetail.type "urn:aihub:media-unavailable" - retryable, the client
+            shows "try again"). The client discriminates on `type`, never on `detail` wording.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing, malformed, or expired JWT. No response body.
+        "404":
+          description: No project with this id is owned by the caller (AC-S).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+
+  /media/upload-url:
+    post:
+      operationId: createMediaUploadUrl
+      summary: Issue a presigned upload URL
+      description: >-
+        Authenticated. Generates an opaque, server-chosen media_ref storage key owned by the
+        caller and returns it with a presigned PUT URL valid for 15 minutes. The client uploads
+        image bytes directly to that URL (ARCHITECTURE.md's ingestion pipeline decision - the
+        backend never sees the bytes). The URL authorises a PUT to this one key only: no read, no
+        listing. Past the 15-minute window R2 rejects the PUT directly; the client's retry then
+        hits createEntry's "urn:aihub:media-unavailable" case (AC-7).
+      tags: [media]
+      responses:
+        "200":
+          description: A presigned upload target.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaUploadUrl"
+        "401":
+          description: Missing, malformed, or expired JWT. No response body.
+
 components:
   securitySchemes:
     bearerAuth:
@@ -167,6 +246,35 @@ components:
             The project_type's field schema. For the receipts type: merchant, purchased_at,
             total, currency (required), tax_total, payment_method, line_items (optional). Empty
             until extraction (KAN-6) fills it in.
+
+    MediaUploadUrl:
+      type: object
+      required: [mediaRef, uploadUrl, expiresAt]
+      properties:
+        mediaRef:
+          type: string
+          description: Opaque storage key. Pass back unchanged to POST .../entries; never parse it.
+        uploadUrl:
+          type: string
+          format: uri
+          description: Presigned PUT target. PUT the image bytes here directly; do not send them to the API.
+        expiresAt:
+          type: string
+          format: date-time
+          description: uploadUrl stops working after this instant (15 minutes from issue).
+
+    CreateEntryRequest:
+      type: object
+      required: [mediaRef, idempotencyKey]
+      properties:
+        mediaRef:
+          type: string
+          description: A mediaRef from a prior POST /media/upload-url response, now uploaded to R2.
+        idempotencyKey:
+          type: string
+          description: >-
+            Client-generated per capture (e.g. a UUID). Retrying the same capture with the same
+            key returns the original entry rather than creating a duplicate (AC-3).
 
 # Contract-first: endpoints are added here in the same commit as their implementation.
 # The Expo TS client is generated from this file.

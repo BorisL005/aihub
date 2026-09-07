@@ -10,3 +10,11 @@ spring:
 # relaxed binding. Left unset here on purpose - see dev.aihub.security.SecurityConfig.jwtDecoder
 # and backend/README.md.
 
+# R2 bucket for capture media (KAN-5). Required in every real environment; read from the
+# R2_ENDPOINT / R2_BUCKET / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY env vars via Spring's relaxed
+# binding. Left unset here on purpose - see dev.aihub.ingestion.MediaStorageConfig.
+
+media:
+  upload-url-ttl: 15m
+  orphan-retention: 24h
+

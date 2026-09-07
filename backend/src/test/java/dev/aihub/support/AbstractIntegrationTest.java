@@ -26,7 +26,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * let its own Ryuk reaper clean it up at JVM exit.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Import(TestJwtSupport.class)
+@Import({TestJwtSupport.class, TestObjectStorageSupport.class})
 public abstract class AbstractIntegrationTest {
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17-alpine");
