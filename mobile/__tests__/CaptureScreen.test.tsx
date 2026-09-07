@@ -227,6 +227,35 @@ describe("CaptureScreen", () => {
     expect(api.createEntry).toHaveBeenCalledTimes(2);
   });
 
+  // AC-3 (QA regression for review blocker B1): the real client retry path is "response lost,
+  // user taps Try again" - the server may already have committed the row from the first attempt,
+  // so the retry MUST carry the same idempotency key or it claims a second entries row. The
+  // existing retry test above only asserts createEntry was called twice; it would have passed
+  // even with the pre-fix code, which minted a fresh key per attempt (useCaptureFlow.ts used to
+  // call generateIdempotencyKey() inline in runSave instead of once in onPhotoTaken). This
+  // asserts the key itself is identical across both calls, which is the actual bug B1 described.
+  it("reuses the same idempotency key across a retry after a lost response", async () => {
+    api.createEntry
+      .mockRejectedValueOnce(new ApiError(400, "unavailable", MEDIA_UNAVAILABLE_TYPE))
+      .mockResolvedValueOnce({ entry: CREATED_ENTRY, created: true });
+    mockedUseCameraPermissions.mockReturnValue([grantedPermission(), jest.fn()]);
+    const { onSaved } = await renderCaptureScreen();
+    await waitFor(() => expect(screen.getByTestId("camera-live")).toBeTruthy());
+    await fireEvent.press(screen.getByTestId("shutter-button"));
+    await waitFor(() => expect(screen.getByTestId("photo-preview")).toBeTruthy());
+    await fireEvent.press(screen.getByText("Use photo"));
+    await waitFor(() => expect(screen.getByTestId("save-error")).toBeTruthy());
+
+    await fireEvent.press(screen.getByText("Try again"));
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(CREATED_ENTRY));
+    expect(api.createEntry).toHaveBeenCalledTimes(2);
+    const firstKey = api.createEntry.mock.calls[0][1].idempotencyKey;
+    const secondKey = api.createEntry.mock.calls[1][1].idempotencyKey;
+    expect(firstKey).toBeTruthy();
+    expect(secondKey).toBe(firstKey);
+  });
+
   // AC-11: cancelling mid-save returns to preview with the photo retained, no entry created.
   it("returns to preview when the save is cancelled and creates no entry", async () => {
     mockedPutWithProgress.mockImplementation(

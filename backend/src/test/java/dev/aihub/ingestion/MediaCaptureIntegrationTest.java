@@ -183,6 +183,31 @@ class MediaCaptureIntegrationTest extends AbstractIntegrationTest {
         assertThat(storage.exists(mediaRef)).isFalse();
     }
 
+    // AC-4 (QA regression for review blocker B2): R2 can return a null Content-Type (e.g. an
+    // object PUT without one, since the presigned PUT does not bind the header - see the Majors
+    // list). EntryService.java:88 used to NPE out of Set.of(...).contains(null) here, producing a
+    // 500 with the object left in R2 instead of AC-4's required 400 + delete. Fixed in ea239ee;
+    // this proves it at the HTTP boundary, not just by reading the null-check.
+    @Test
+    void rejectsAnUploadWithNoContentTypeAndDeletesTheObject() {
+        String userId = uniqueUserId();
+        UUID projectId = provisionProject(userId);
+        String mediaRef = issueUploadUrl(userId);
+        storage.putObject(mediaRef, null, 1024);
+
+        restTestClient.post().uri("/projects/{id}/entries", projectId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TestJwtSupport.validToken(userId))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body("{\"mediaRef\":\"" + mediaRef + "\",\"idempotencyKey\":\"" + UUID.randomUUID() + "\"}")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.type").isEqualTo("urn:aihub:media-rejected");
+
+        assertThat(dsl.fetchCount(Entries.TABLE, Entries.PROJECT_ID.eq(projectId))).isZero();
+        assertThat(storage.exists(mediaRef)).isFalse();
+    }
+
     // AC-9
     @Test
     void rejectsAMediaRefWithNoObjectInStorage() {
