@@ -78,18 +78,27 @@ test('AC-6: no step prints the deploy key, R2/Auth0 secrets, or deploy/.env cont
   assert.doesNotMatch(yaml, /cat\s+.*\.env\b/i, 'must not cat deploy/.env');
 });
 
-test('AC-6: no step echoes/cats the deploy key env var to stdout', () => {
+test('AC-6: $STAGING_DEPLOY_KEY is referenced nowhere except the single expected write-to-file line', () => {
   const yaml = readWorkflow();
   // Secrets are mapped to env vars (env: STAGING_DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }})
-  // and referenced downstream as plain shell vars, e.g. $STAGING_DEPLOY_KEY - the direct
-  // `${{ secrets.X }}` check above doesn't catch a step that echoes the mapped var instead.
-  // The one legitimate use (writing the key to its file) always redirects into that file.
+  // and referenced downstream as plain shell vars. A line-scoped "does this line echo/cat the
+  // var" check (tried first, see git history) misses any leak that separates "read the secret"
+  // from "print it" - a heredoc body, a reassignment to another var, an encoded copy - across
+  // lines, which GitHub's own log masking doesn't catch either since it only redacts the exact
+  // raw secret string. Asserting there is exactly one reference at all, and that it is the one
+  // known-safe line, closes that off regardless of what a future line does with the value.
   const referencingLines = yaml.split('\n').filter((line) => /\$\{?STAGING_DEPLOY_KEY\}?/.test(line));
-  for (const line of referencingLines) {
-    const printsToStdout =
-      /\b(?:echo|printf|cat)\b/.test(line) && !/>\s*["']?\S*staging_deploy_key/i.test(line);
-    assert.ok(!printsToStdout, `line references STAGING_DEPLOY_KEY without redirecting to a file: ${line.trim()}`);
-  }
+  assert.equal(
+    referencingLines.length,
+    1,
+    `expected exactly one line referencing $STAGING_DEPLOY_KEY, found ${referencingLines.length}:\n` +
+      referencingLines.map((l) => `  ${l.trim()}`).join('\n')
+  );
+  assert.match(
+    referencingLines[0],
+    /^\s*printf\s+'%s\\n'\s+"\$STAGING_DEPLOY_KEY"\s*>\s*"\$HOME\/\.ssh\/staging_deploy_key"\s*$/,
+    'the sole reference to $STAGING_DEPLOY_KEY must be writing it straight to its key file'
+  );
 });
 
 test('AC-6: no shell tracing (set -x/-v) is enabled anywhere in the workflow', () => {

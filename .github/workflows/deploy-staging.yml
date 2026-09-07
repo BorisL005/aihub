@@ -9,6 +9,10 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
 # The GHCR image tag for this run - defined once here and reused for both
 # the build/push step and the deploy step below, so the deploy always
 # references this same run's image, never a floating tag that could race a
