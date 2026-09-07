@@ -1,7 +1,21 @@
 # deploy/
 
-The entire IaC (ARCHITECTURE.md §2): `docker-compose.yml`, cloud-init, Caddyfile. Empty until the
-infra ticket that provisions the VPS lands.
+The entire IaC (ARCHITECTURE.md §2), provisioned by KAN-12:
+
+- `cloud-init.yaml` - installs Docker Engine + the Compose plugin on a fresh Hetzner node. Nothing
+  else - the deploy key's public half is already in `authorized_keys`.
+- `docker-compose.yml` - three services (`app`, `db`, `caddy`); see the file's own header comment
+  for the invocation contract (`--project-directory` and why `env_file`/volume paths are prefixed
+  `deploy/`).
+- `Caddyfile` - reverse proxy + automatic HTTPS for `api.pi-console.org`.
+- `.env.example` - documents every key `deploy/.env` must supply on the server. `deploy/.env`
+  itself is never committed and the deploy workflow (`.github/workflows/deploy-staging.yml`)
+  never syncs or overwrites it.
+- `scripts/` - static checks against the files above (`node --test`), run in CI by
+  `.github/workflows/deploy-config-test.yml`.
+
+The staging hostname is `api.pi-console.org` - see below, this differs from the
+`staging.aihub.dev` placeholder still sitting in `r2-cors.json` and `api/openapi.yaml`.
 
 ## r2-cors.json
 

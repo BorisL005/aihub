@@ -1,0 +1,8 @@
+# Staging reverse proxy (KAN-12). Caddy's automatic HTTPS obtains and
+# renews a Let's Encrypt certificate for this hostname on its own - the DNS
+# A-record is already provisioned in DNS-only (unproxied) mode, so the
+# ACME HTTP-01/TLS-ALPN challenge reaches this VPS directly. No manual TLS
+# config needed.
+api.pi-console.org {
+	reverse_proxy app:8080
+}
