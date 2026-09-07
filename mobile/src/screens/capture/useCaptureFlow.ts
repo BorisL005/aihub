@@ -45,6 +45,9 @@ export function useCaptureFlow(options: {
     phase: "resolving-permission",
   });
   const abortRef = useRef<AbortController | null>(null);
+  // AC-3: minted once per captured photo (not per save attempt) so a retry after a lost response
+  // replays the same key instead of claiming a second entries row for the same photo.
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (permission == null || state.phase !== "resolving-permission") {
@@ -69,6 +72,7 @@ export function useCaptureFlow(options: {
   const cancelCamera = options.onExit;
 
   const onPhotoTaken = useCallback((photo: CapturedPhoto) => {
+    idempotencyKeyRef.current = generateIdempotencyKey();
     setState({ phase: "preview", photo });
   }, []);
 
@@ -115,7 +119,7 @@ export function useCaptureFlow(options: {
 
         const result = await api.createEntry(
           options.projectId,
-          { mediaRef: upload.mediaRef, idempotencyKey: generateIdempotencyKey() },
+          { mediaRef: upload.mediaRef, idempotencyKey: idempotencyKeyRef.current! },
           controller.signal,
         );
         setState({ phase: "saving", photo, progress: PROGRESS_COMPLETE });

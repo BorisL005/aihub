@@ -85,7 +85,9 @@ public class EntryService {
         ObjectMetadata metadata = objectStorageClient
                 .headObject(request.mediaRef())
                 .orElseThrow(() -> new MediaUnavailableException("no object exists at media_ref yet"));
-        if (!ALLOWED_CONTENT_TYPES.contains(metadata.contentType()) || metadata.contentLength() > MAX_CONTENT_LENGTH_BYTES) {
+        if (metadata.contentType() == null
+                || !ALLOWED_CONTENT_TYPES.contains(metadata.contentType())
+                || metadata.contentLength() > MAX_CONTENT_LENGTH_BYTES) {
             objectStorageClient.delete(request.mediaRef());
             throw new MediaRejectedException("uploaded object fails the content-type/size check");
         }
