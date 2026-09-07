@@ -1,0 +1,36 @@
+name: Release tag
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full tag history is required - a shallow checkout may not include
+          # the commits earlier tags point at, so "reachable from master"
+          # couldn't be computed correctly.
+          fetch-depth: 0
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Compute next tag
+        id: next_tag
+        run: echo "tag=$(node .github/workflows/scripts/print-next-tag.js)" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        run: |
+          git tag "${{ steps.next_tag.outputs.tag }}"
+          git push origin "${{ steps.next_tag.outputs.tag }}"
