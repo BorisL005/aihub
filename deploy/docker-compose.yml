@@ -12,10 +12,14 @@
 
 services:
   app:
-    # build: is for local dev convenience only (e.g. `cd deploy && docker
-    # compose build`) - the deploy workflow never runs `docker compose
-    # build`/`up --build`, only `pull` then `up -d`, so this context's
-    # resolution under --project-directory on the server is never exercised.
+    # build: is for local dev convenience only - the deploy workflow never
+    # runs `docker compose build`/`up --build`, only `pull` then `up -d`, so
+    # this is never exercised on the server. To build locally, run from the
+    # repo root using the same --project-directory contract the deploy
+    # workflow uses on the server (running `docker compose build` from
+    # inside deploy/ breaks env_file resolution - it would look for
+    # deploy/deploy/.env):
+    #   docker compose --project-directory . -f deploy/docker-compose.yml build
     build:
       context: ../backend
       dockerfile: Dockerfile

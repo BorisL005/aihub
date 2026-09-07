@@ -14,6 +14,14 @@ The entire IaC (ARCHITECTURE.md §2), provisioned by KAN-12:
 - `scripts/` - static checks against the files above (`node --test`), run in CI by
   `.github/workflows/deploy-config-test.yml`.
 
+## First-time server setup (manual, owner-only)
+
+Before the first deploy workflow run can succeed, the owner must place a `.env` file at
+`~/aihub/deploy/.env` on the staging node, populated per `.env.example`. Nothing in cloud-init
+or the deploy workflow creates this file - `docker compose` fails at config load without it, and
+the workflow deliberately never syncs or touches it (see AC in KAN-12: `deploy/.env` must never
+be pushed from CI).
+
 The staging hostname is `api.pi-console.org` - see below, this differs from the
 `staging.aihub.dev` placeholder still sitting in `r2-cors.json` and `api/openapi.yaml`.
 

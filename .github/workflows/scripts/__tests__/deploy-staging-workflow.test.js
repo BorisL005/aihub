@@ -78,6 +78,20 @@ test('AC-6: no step prints the deploy key, R2/Auth0 secrets, or deploy/.env cont
   assert.doesNotMatch(yaml, /cat\s+.*\.env\b/i, 'must not cat deploy/.env');
 });
 
+test('AC-6: no step echoes/cats the deploy key env var to stdout', () => {
+  const yaml = readWorkflow();
+  // Secrets are mapped to env vars (env: STAGING_DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }})
+  // and referenced downstream as plain shell vars, e.g. $STAGING_DEPLOY_KEY - the direct
+  // `${{ secrets.X }}` check above doesn't catch a step that echoes the mapped var instead.
+  // The one legitimate use (writing the key to its file) always redirects into that file.
+  const referencingLines = yaml.split('\n').filter((line) => /\$\{?STAGING_DEPLOY_KEY\}?/.test(line));
+  for (const line of referencingLines) {
+    const printsToStdout =
+      /\b(?:echo|printf|cat)\b/.test(line) && !/>\s*["']?\S*staging_deploy_key/i.test(line);
+    assert.ok(!printsToStdout, `line references STAGING_DEPLOY_KEY without redirecting to a file: ${line.trim()}`);
+  }
+});
+
 test('AC-6: no shell tracing (set -x/-v) is enabled anywhere in the workflow', () => {
   const yaml = readWorkflow();
   assert.doesNotMatch(yaml, /set\s+-\S*x/);
