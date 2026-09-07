@@ -1,0 +1,251 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+
+const { validatePairs } = require('../validate-pairs');
+const { makeValidFixtureSet, cleanup } = require('./helpers');
+
+const CLI_PATH = path.join(__dirname, '..', 'validate-pairs.js');
+
+test('AC-2: exactly 24 complete pairs validates OK', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    const result = validatePairs(dir);
+    assert.equal(result.ok, true);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: missing NNN.jpg fails and names the missing pair', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '013.jpg'));
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('013') && p.includes('013.jpg')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: missing NNN.expected.json fails and names the missing pair', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '007.expected.json'));
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('007') && p.includes('007.expected.json')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: unparseable NNN.expected.json fails and names the file', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.writeFileSync(path.join(dir, '009.expected.json'), '{ not valid json ');
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('009.expected.json') && p.includes('not valid JSON')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: orphaned unpaired file fails and names the file', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.writeFileSync(path.join(dir, '025.jpg'), Buffer.from([0xff]));
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('025.jpg')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: a count other than 24 fails (under)', () => {
+  const dir = makeValidFixtureSet(20);
+  try {
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('expected exactly 24 pairs')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: a count other than 24 fails (over — a 25th pair, e.g. batch 003 dropped in early)', () => {
+  const dir = makeValidFixtureSet(25);
+  try {
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(
+      result.problems.some((p) => p.includes('expected exactly 24 pairs')),
+      'must fail on 25 pairs, not just treat the extra as silently fine'
+    );
+    assert.ok(
+      result.problems.some((p) => p.includes('025')),
+      'must name pair 025 as the orphan/unexpected pair, not just report a bare count mismatch'
+    );
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: empty directory fails', () => {
+  const dir = makeValidFixtureSet(0);
+  try {
+    fs.unlinkSync(path.join(dir, 'README.md'));
+    fs.unlinkSync(path.join(dir, 'MANIFEST.md'));
+    fs.unlinkSync(path.join(dir, 'MANIFEST-002.md'));
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('empty')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: absent directory fails', () => {
+  const result = validatePairs('/nonexistent/path/does-not-exist');
+  assert.equal(result.ok, false);
+  assert.ok(result.problems.some((p) => p.includes('does not exist')));
+});
+
+test('QA edge case: a stray subdirectory (e.g. a botched R2 sync nesting receipts/receipts/) ' +
+  'is flagged as an orphan by the "no extra/unnumbered/unpaired files" check from AC-2/AC-3 — ' +
+  'only the allowed "scripts" directory is exempt', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.mkdirSync(path.join(dir, 'stray-subdir'));
+    fs.writeFileSync(path.join(dir, 'stray-subdir', 'oops.jpg'), Buffer.from([0xff]));
+
+    const result = validatePairs(dir);
+    assert.equal(
+      result.ok,
+      false,
+      'an unexpected directory dropped into the eval dir should fail validation (or at least be ' +
+        'named as a problem), not be silently skipped by the isFile() filter'
+    );
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: README/MANIFEST files are ignored, not treated as orphans', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    const result = validatePairs(dir);
+    assert.equal(result.ok, true);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('M1: a future MANIFEST-003.md (matching the MANIFEST*.md pattern shared with .gitignore, ' +
+  'not an enumerated filename) is ignored by validation, not treated as an orphan', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.writeFileSync(path.join(dir, 'MANIFEST-003.md'), '# batch 3 (Polish fiscal)\n');
+    const result = validatePairs(dir);
+    assert.equal(
+      result.ok,
+      true,
+      'a MANIFEST-003.md-style file must not be reported as an orphan or thrown off the pair count'
+    );
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('M1: a file that only starts with "MANIFEST" but does not match the MANIFEST(-NNN).md ' +
+  'pattern is still flagged as an orphan (the pattern is not a bare prefix check)', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.writeFileSync(path.join(dir, 'MANIFESTO.md'), 'not a manifest\n');
+    const result = validatePairs(dir);
+    assert.equal(result.ok, false);
+    assert.ok(result.problems.some((p) => p.includes('MANIFESTO.md')));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: CLI exits non-zero on a validation failure (proves the job fails hard)', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '013.jpg'));
+    const proc = spawnSync('node', [CLI_PATH, dir], { encoding: 'utf8' });
+    assert.notEqual(proc.status, 0);
+    assert.ok(proc.stderr.includes('013'));
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-3: CLI exits zero on a valid set', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    const proc = spawnSync('node', [CLI_PATH, dir], { encoding: 'utf8' });
+    assert.equal(proc.status, 0);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8/AC-3 owner ruling: the validation step writes a failure report file naming exactly ' +
+  'what is missing or mismatched, so the job can end red with that report attached even though ' +
+  'the comparison step never runs', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '013.jpg'));
+    fs.writeFileSync(path.join(dir, '009.expected.json'), '{ not valid json ');
+
+    const reportPath = path.join(dir, 'validation-report.txt');
+    const proc = spawnSync('node', [CLI_PATH, dir, reportPath], { encoding: 'utf8' });
+
+    assert.notEqual(proc.status, 0);
+    assert.ok(fs.existsSync(reportPath), 'a failure must write a report file');
+    const report = fs.readFileSync(reportPath, 'utf8');
+    assert.match(report, /013.*013\.jpg/s);
+    assert.match(report, /009\.expected\.json/);
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8/AC-3 owner ruling: the failure report defaults into the validated directory itself, ' +
+  'and does not then count itself as an orphan on a later run', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.unlinkSync(path.join(dir, '013.jpg'));
+    const first = spawnSync('node', [CLI_PATH, dir], { encoding: 'utf8' });
+    assert.notEqual(first.status, 0);
+    assert.ok(fs.existsSync(path.join(dir, 'validation-report.txt')));
+
+    fs.writeFileSync(path.join(dir, '013.jpg'), Buffer.from([0xff, 0xd8, 0xff]));
+    const result = validatePairs(dir);
+    assert.equal(result.ok, true, 'a leftover validation-report.txt from a prior failed run must not itself be flagged as an orphan');
+  } finally {
+    cleanup(dir);
+  }
+});
+
+test('AC-8/AC-3 owner ruling: a directory alongside the fixtures matching the allowed "scripts" ' +
+  'name is not treated as an orphan (the eval scripts live next to the synced fixtures)', () => {
+  const dir = makeValidFixtureSet(24);
+  try {
+    fs.mkdirSync(path.join(dir, 'scripts'));
+    fs.writeFileSync(path.join(dir, 'scripts', 'validate-pairs.js'), '// stub\n');
+    const result = validatePairs(dir);
+    assert.equal(result.ok, true);
+  } finally {
+    cleanup(dir);
+  }
+});

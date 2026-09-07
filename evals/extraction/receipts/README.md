@@ -1,56 +1,59 @@
 # Receipt extraction eval set
 
-Reference data for evaluating receipt extraction quality (KAN-6 gate).
+Pairs: `NNN.jpg` + `NNN.expected.json` (reference extraction). Target: 30-50 real receipts
+incl. crumpled, handwritten, and Polish fiscal (comma decimals). Run on every prompt/model change.
 
-## Where the data lives
+Fixture files (`*.jpg`, `*.expected.json`) are gitignored — they are not committed.
+Any `MANIFEST*.md` file (`MANIFEST.md`, `MANIFEST-002.md`, and any future batch's
+`MANIFEST-NNN.md`) is also gitignored: these are private R2 bucket contents (owner
+spend history) and must never be committed to this public repo, even though CI reads
+them for the pairing check below. They arrive locally the same way the fixtures do —
+via the R2 sync. This `README.md`, and the `scripts/` directory, are the only tracked
+contents of this directory.
 
-The photos and reference JSONs are **not in git** (privacy: real receipts).
-Source of truth is the private R2 bucket, prefix `receipts/`. This directory
-is gitignored; only this README is tracked.
+## Source of truth
 
-- Local working copy (Pi / laptop):
-  `aws s3 sync s3://aihub-evals/receipts/ evals/extraction/receipts/ --endpoint-url "$R2_ENDPOINT"`
-- CI obtains the data the same way, using repository secrets
-  `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
-
-## Layout and pairing convention
-
-Flat, sequentially numbered:
+The set lives in a private Cloudflare R2 bucket, prefix `receipts/`. CI syncs it before any
+evaluation runs:
 
 ```
-receipts/
-  001.jpg            photo as the mobile client would upload it (<=1400px, jpeg)
-  001.expected.json  owner-verified reference extraction for 001.jpg
-  ...
-  MANIFEST.md        batch 001 (receipts 001-010): per-receipt verification notes
-  MANIFEST-002.md    batch 002 (receipts 011-024)
+aws s3 sync s3://aihub-evals/receipts/ evals/extraction/receipts/ --endpoint-url "$R2_ENDPOINT"
 ```
 
-Every `NNN.jpg` has exactly one `NNN.expected.json`. Reference JSONs follow the
-`receipts` project_type payload schema (see the KAN-4 ticket): `merchant`,
-`purchased_at` (YYYY-MM-DD), `total`, `currency`, optional `tax_total`,
+Authenticated via repository secrets `R2_ENDPOINT`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
+
+## Pairing convention
+
+Every `NNN` from `001` to the current set size must have both `NNN.jpg` and a valid
+`NNN.expected.json`. No orphaned or unpaired files. Any `MANIFEST*.md` batch manifest,
+this `README.md`, the validator's own `validation-report.txt` failure report, and the
+`scripts/` directory (where these eval scripts live) are not fixture files and are
+excluded from the pairing check.
+
+Reference JSONs follow the `receipts` project_type payload schema used by KAN-4:
+`merchant`, `purchased_at` (YYYY-MM-DD), `total`, `currency`, optional `tax_total`,
 `payment_method`, `line_items[]`.
 
-## Semantics that evaluators must respect
+## Annotation convention
 
-- `total` is the grand total actually PAID, including tips and after cash
-  rounding - not the pre-tip amount and not the pre-rounding subtotal. Several
-  receipts (002, 004, 007, 008, 009, 012, 014, 017, 020, 022, 024) exist
-  specifically to punish confusing the two.
-- Keys starting with `_` in expected JSONs are annotations for humans and the
-  eval harness, not extraction targets.
-- `019` is a designated needs_review case: the merchant appears only as a
-  logo. Correct behavior is a validation failure routed to the confirmation
-  queue; a confidently hallucinated merchant name is a scored MISS.
-- `020` shows one transaction printed twice on a single strip. Correct
-  behavior is ONE entry.
+Any key prefixed with `_` in an `NNN.expected.json` is annotation metadata for a human
+reviewer (e.g. `_note`, `_expected_outcome`) — it is never part of the extraction schema and
+is excluded from field-by-field comparison.
 
-## Set status
+## Eval semantics
 
-24 receipts (batches 001-002), all CAD, restaurant-heavy - a deliberate
-partial set. KAN-6 threshold ACs may run on it with an explicit partial-set
-note. Batch 003 (owner TODO) adds the missing coverage: Polish fiscal
-receipts (comma decimals, PTU sections), long grocery lists, handwritten,
-non-CAD currencies. An empty or missing set is a FAIL for gated tickets,
-never a skip.
+- `total` is always the grand total actually paid, tips and cash-rounding included — never a
+  subtotal or pre-tip figure. Receipts 002, 004, 007, 008, 009, 012, 014, 017, 020, 022, 024
+  exist specifically to test this ("tip trap" cases) — see `MANIFEST.md`/`MANIFEST-002.md`
+  for the per-receipt notes.
+- `019` is a designated `needs_review` case (`_expected_outcome`): the merchant is unreadable
+  (logo only). A confidently produced merchant name from extraction is scored as a miss, not
+  a match — a hallucinated answer is never rewarded.
+- `020` is a dedup case (`_note`): the same transaction is printed twice on one receipt
+  strip. Exactly one entry must be scored for it; producing two is a mismatch.
 
+## Current set
+
+24 pairs (`001`-`024`, batches 001-002). Batch 003 (Polish fiscal, handwritten, non-CAD,
+long grocery lists) is an outstanding owner TODO toward the 30-50 target. An empty or
+missing set is a FAIL for gated tickets, never a skip.
