@@ -61,8 +61,25 @@ public final class Tables {
         public static final Field<String> VALIDATION_STATUS =
                 field(name("entries", "validation_status"), SQLDataType.VARCHAR);
         public static final Field<JSONB> PAYLOAD = field(name("entries", "payload"), SQLDataType.JSONB);
+        public static final Field<String> MEDIA_REF = field(name("entries", "media_ref"), SQLDataType.VARCHAR);
+        public static final Field<String> IDEMPOTENCY_KEY =
+                field(name("entries", "idempotency_key"), SQLDataType.VARCHAR);
 
         private Entries() {
+        }
+    }
+
+    public static final class MediaUploads {
+
+        public static final Table<Record> TABLE = table(name("media_uploads"));
+        public static final Field<String> MEDIA_REF = field(name("media_uploads", "media_ref"), SQLDataType.VARCHAR);
+        public static final Field<String> USER_ID = field(name("media_uploads", "user_id"), SQLDataType.VARCHAR);
+        public static final Field<OffsetDateTime> CREATED_AT =
+                field(name("media_uploads", "created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE);
+        public static final Field<OffsetDateTime> CLAIMED_AT =
+                field(name("media_uploads", "claimed_at"), SQLDataType.TIMESTAMPWITHTIMEZONE);
+
+        private MediaUploads() {
         }
     }
 }

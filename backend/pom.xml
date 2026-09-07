@@ -19,9 +19,35 @@
 
     <properties>
         <java.version>21</java.version>
+        <aws-sdk.version>2.29.30</aws-sdk.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws-sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
+        <!-- R2 is S3-compatible (ARCHITECTURE.md object storage decision); the AWS SDK's S3
+             client and presigner work against it unchanged with an endpoint override
+             (dev.aihub.ingestion.R2ObjectStorageClient). url-connection-client is the lightweight
+             synchronous HTTP transport - fits the blocking-on-virtual-threads style, no reactive
+             client needed for R2's low request volume here. -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

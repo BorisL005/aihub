@@ -1,12 +1,10 @@
 import { StyleSheet, Text, View } from "react-native";
 import { colors } from "../theme/colors";
 import { spacing, typography } from "../theme/tokens";
-import { PrimaryButton } from "./PrimaryButton";
 
-// design/KAN-4/ListEmpty.dc.html (reused byte-for-byte from KAN-5's canvas per this ticket's
-// Notes for design). Capture isn't built yet (KAN-5), so the button renders disabled (§5's
-// Disabled variant) rather than as a live control that silently does nothing when tapped -
-// a dead-looking primary CTA on the app's front door reads as a broken app.
+// design/KAN-5/ListEmpty.dc.html. The Capture button itself lives in ReceiptsListScreen's footer,
+// not here - "same capture button position as the populated list" (canvas note) means one shared
+// footer element, not two screens each drawing their own copy of it.
 export function EmptyState() {
   return (
     <View style={styles.container} testID="empty-state">
@@ -14,9 +12,6 @@ export function EmptyState() {
       <Text style={styles.body}>
         Take a photo of a receipt and you can throw the paper away straight after.
       </Text>
-      <View style={styles.action}>
-        <PrimaryButton label="Capture receipt" disabled />
-      </View>
     </View>
   );
 }
@@ -41,9 +36,5 @@ const styles = StyleSheet.create({
     lineHeight: typography.body.lineHeight,
     color: colors.inkMuted,
     textAlign: "center",
-  },
-  action: {
-    marginTop: spacing.xl,
-    alignSelf: "stretch",
   },
 });
