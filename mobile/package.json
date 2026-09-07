@@ -33,5 +33,10 @@
     "react-server-dom-webpack": "~19.2.4",
     "test-renderer": "^1.0.0",
     "typescript": "~7.0.2"
+  },
+  "overrides": {
+    "ts-api-utils": {
+      "typescript": "6.0.3"
+    }
   }
 }
