@@ -1,0 +1,28 @@
+name: Release workflow script tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  release-workflow-script-test:
+    name: release-workflow-script-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run release tag script and workflow tests
+        working-directory: .github/workflows/scripts
+        run: node --test
