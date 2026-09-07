@@ -28,9 +28,17 @@ jobs:
 
       - name: Compute next tag
         id: next_tag
-        run: echo "tag=$(node .github/workflows/scripts/print-next-tag.js)" >> "$GITHUB_OUTPUT"
+        run: |
+          set -euo pipefail
+          # Capturing into a variable first (rather than echoing the command
+          # substitution directly) means a script failure fails THIS step -
+          # "echo tag=$(...)" always exits 0 regardless of the script.
+          tag=$(node .github/workflows/scripts/print-next-tag.js)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Create and push tag
+        env:
+          TAG: ${{ steps.next_tag.outputs.tag }}
         run: |
-          git tag "${{ steps.next_tag.outputs.tag }}"
-          git push origin "${{ steps.next_tag.outputs.tag }}"
+          git tag "$TAG"
+          git push origin "$TAG"
