@@ -1,0 +1,25 @@
+name: Deploy config tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - master
+
+jobs:
+  deploy-config-test:
+    name: deploy-config-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run deploy config tests
+        working-directory: deploy/scripts
+        run: node --test

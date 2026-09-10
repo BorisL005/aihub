@@ -1,4 +1,5 @@
 .env*
+!deploy/.env.example
 node_modules/
 build/
 .gradle/

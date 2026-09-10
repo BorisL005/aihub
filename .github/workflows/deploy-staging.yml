@@ -1,0 +1,88 @@
+name: Deploy to staging
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+# The GHCR image tag for this run - defined once here and reused for both
+# the build/push step and the deploy step below, so the deploy always
+# references this same run's image, never a floating tag that could race a
+# concurrent push (AC-5).
+#
+# NOTE for the owner: GHCR packages created via the default GITHUB_TOKEN
+# default to private. `docker compose pull` on the server has no registry
+# credential configured, so the package must be made public (Package
+# settings > Danger Zone > Change visibility) after the first successful
+# push - this workflow cannot do that itself with GITHUB_TOKEN. See KAN-12's
+# "Notes for dev".
+env:
+  IMAGE_TAG: ghcr.io/borisl005/aihub-backend:${{ github.sha }}
+
+jobs:
+  deploy-staging:
+    name: deploy-staging
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.IMAGE_TAG }}
+
+      - name: Configure SSH
+        env:
+          STAGING_DEPLOY_KEY: ${{ secrets.STAGING_DEPLOY_KEY }}
+          STAGING_SERVER_IP: ${{ secrets.STAGING_SERVER_IP }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "$STAGING_DEPLOY_KEY" > "$HOME/.ssh/staging_deploy_key"
+          chmod 600 "$HOME/.ssh/staging_deploy_key"
+          ssh-keyscan -H "$STAGING_SERVER_IP" >> "$HOME/.ssh/known_hosts" 2>/dev/null
+
+      - name: Sync compose file and Caddyfile
+        env:
+          STAGING_SERVER_IP: ${{ secrets.STAGING_SERVER_IP }}
+        run: |
+          set -euo pipefail
+          SSH_OPTS="-i $HOME/.ssh/staging_deploy_key -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          ssh $SSH_OPTS "root@$STAGING_SERVER_IP" "mkdir -p ~/aihub/deploy"
+          rsync -az -e "ssh $SSH_OPTS" deploy/docker-compose.yml deploy/Caddyfile "root@$STAGING_SERVER_IP:~/aihub/deploy/"
+
+      - name: Deploy via docker compose
+        env:
+          STAGING_SERVER_IP: ${{ secrets.STAGING_SERVER_IP }}
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+        run: |
+          set -euo pipefail
+          SSH_OPTS="-i $HOME/.ssh/staging_deploy_key -o UserKnownHostsFile=$HOME/.ssh/known_hosts"
+          ssh $SSH_OPTS "root@$STAGING_SERVER_IP" "IMAGE_TAG=$IMAGE_TAG docker compose --project-directory ~/aihub -f ~/aihub/deploy/docker-compose.yml pull && IMAGE_TAG=$IMAGE_TAG docker compose --project-directory ~/aihub -f ~/aihub/deploy/docker-compose.yml up -d"
+
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f "$HOME/.ssh/staging_deploy_key"

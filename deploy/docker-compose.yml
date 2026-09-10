@@ -1,0 +1,91 @@
+# AI Hub staging deploy stack (KAN-12). Three services: app, db, caddy.
+#
+# Invocation contract: `.github/workflows/deploy-staging.yml` runs this file
+# with the compose "project directory" set one level ABOVE this deploy/
+# folder on the server (e.g. `docker compose --project-directory ~/aihub -f
+# ~/aihub/deploy/docker-compose.yml ...`). That is why every relative path
+# below (env_file, the Caddyfile bind mount) is anchored under `deploy/` -
+# it resolves against that project directory, so `deploy/.env` here means
+# the same `~/aihub/deploy/.env` that the deploy workflow never syncs or
+# touches. IMAGE_TAG is exported by the deploy workflow on the same command
+# line that invokes `pull`/`up -d`; it is not read from a dotenv file.
+
+services:
+  app:
+    # build: is for local dev convenience only - the deploy workflow never
+    # runs `docker compose build`/`up --build`, only `pull` then `up -d`, so
+    # this is never exercised on the server. To build locally, run from the
+    # repo root using the same --project-directory contract the deploy
+    # workflow uses on the server (running `docker compose build` from
+    # inside deploy/ breaks env_file resolution - it would look for
+    # deploy/deploy/.env):
+    #   docker compose --project-directory . -f deploy/docker-compose.yml build
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    image: ${IMAGE_TAG:?IMAGE_TAG must be set to the ghcr.io image tag to deploy}
+    restart: unless-stopped
+    env_file: deploy/.env
+    environment:
+      # Explicit heap cap - the container memory limit below is not
+      # sufficient JVM sizing on its own (JVM defaults to a fraction of the
+      # container limit, and default fractions differ across JVM builds).
+      JAVA_TOOL_OPTIONS: -Xmx1g
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          memory: 1200m
+
+  db:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    env_file: deploy/.env
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      # $$ (escaped) so these expand inside the container's own shell against
+      # its env_file-supplied vars, not via host-side compose interpolation.
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 768m
+    # AC-S: no ports: mapping - db is reachable only from other services on
+    # the internal network, never published to the host/internet.
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+
+networks:
+  internal:
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:
