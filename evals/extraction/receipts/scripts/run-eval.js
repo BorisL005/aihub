@@ -14,6 +14,7 @@ const path = require('node:path');
 
 const { compareEntry } = require('./compare');
 const { generateReport } = require('./report');
+const { checkThresholds } = require('./thresholds');
 const { EXPECTED_COUNT } = require('./validate-pairs');
 
 function pad3(n) {
@@ -114,9 +115,33 @@ async function main() {
   }
 
   console.log(generateReport(results));
+  reportThresholds(results);
 }
 
-module.exports = { runEval, loadExtractor };
+// AC-7: the CI gate. Prints per-field accuracy against AC-6's thresholds and fails the process
+// if any gated field is under its minimum - on the available verified set, per the 2026-09-19
+// owner decision (KAN-6 ticket Decisions), not the full 30-50 target until batch 003 lands.
+function reportThresholds(results) {
+  const { accuracy, failures, passed } = checkThresholds(results);
+  console.log('');
+  console.log('Per-field accuracy against AC-6 thresholds:');
+  for (const [field, value] of Object.entries(accuracy)) {
+    console.log(`  ${field}: ${(value * 100).toFixed(1)}%`);
+  }
+  if (!passed) {
+    console.error('');
+    console.error('receipt eval FAILED threshold gate (AC-7):');
+    for (const failure of failures) {
+      console.error(
+        `  ${failure.field}: ${(failure.actual * 100).toFixed(1)}% is below the required ` +
+        `${(failure.min * 100).toFixed(0)}%`
+      );
+    }
+    process.exitCode = 1;
+  }
+}
+
+module.exports = { runEval, loadExtractor, reportThresholds };
 
 if (require.main === module) {
   main().catch((err) => {

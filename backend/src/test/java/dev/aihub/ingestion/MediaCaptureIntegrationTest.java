@@ -54,9 +54,11 @@ class MediaCaptureIntegrationTest extends AbstractIntegrationTest {
                 .isEqualTo(userId);
     }
 
-    // AC-1
+    // AC-1 (KAN-5's claim mechanics) + AC-1 (KAN-6's extraction, now synchronous on the same
+    // request): a camera entry is claimed, then immediately extracted before the response - the
+    // client never observes a "pending" row it created itself through this endpoint.
     @Test
-    void createEntryStoresCameraSourceRowWithPendingStatusAfterUpload() {
+    void createEntryStoresCameraSourceRowAndExtractsItBeforeResponding() {
         String userId = uniqueUserId();
         UUID projectId = provisionProject(userId);
         String mediaRef = issueUploadUrl(userId);
@@ -71,8 +73,8 @@ class MediaCaptureIntegrationTest extends AbstractIntegrationTest {
                 .expectBody()
                 .jsonPath("$.id").exists()
                 .jsonPath("$.source").isEqualTo("camera")
-                .jsonPath("$.validationStatus").isEqualTo("pending")
-                .jsonPath("$.payload").exists();
+                .jsonPath("$.validationStatus").isEqualTo("extracted")
+                .jsonPath("$.payload.merchant").isEqualTo("Test Merchant");
 
         assertThat(dsl.fetchCount(Entries.TABLE, Entries.PROJECT_ID.eq(projectId))).isEqualTo(1);
         assertThat(dsl.fetchOne(MediaUploads.TABLE, MediaUploads.MEDIA_REF.eq(mediaRef)).get(MediaUploads.CLAIMED_AT))
@@ -105,7 +107,7 @@ class MediaCaptureIntegrationTest extends AbstractIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.items[0].id").isEqualTo(newEntryId)
-                .jsonPath("$.items[0].validationStatus").isEqualTo("pending");
+                .jsonPath("$.items[0].validationStatus").isEqualTo("extracted");
     }
 
     // AC-3

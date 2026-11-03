@@ -15,8 +15,11 @@ import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
 import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Exception;
@@ -77,6 +80,16 @@ class R2ObjectStorageClientTest {
                 .thenThrow(S3Exception.builder().statusCode(500).build());
 
         assertThatThrownBy(() -> client.headObject("uploads/abc-123")).isInstanceOf(S3Exception.class);
+    }
+
+    // KAN-6: ReceiptExtractionService reads the captured photo's bytes to send to the model.
+    @Test
+    void getObjectReturnsTheObjectsBytes() {
+        byte[] content = new byte[] {1, 2, 3};
+        when(s3Client.getObjectAsBytes(any(GetObjectRequest.class)))
+                .thenReturn(ResponseBytes.fromByteArray(GetObjectResponse.builder().build(), content));
+
+        assertThat(client.getObject("uploads/abc-123")).isEqualTo(content);
     }
 
     @Test

@@ -84,6 +84,41 @@ public class EntryRepository {
                         record.get(Entries.PAYLOAD).data()));
     }
 
+    /** AC-1: a successful extraction - {@code payload} is the receipts schema's JSON text. */
+    public void markExtracted(UUID entryId, String payloadJson) {
+        dsl.update(Entries.TABLE)
+                .set(Entries.VALIDATION_STATUS, "extracted")
+                .set(Entries.PAYLOAD, JSONB.valueOf(payloadJson))
+                .where(Entries.ID.eq(entryId))
+                .execute();
+    }
+
+    /**
+     * AC-2 / AC-8: extraction failed validation or the model call itself failed.
+     * {@code rawExtraction} is the preserved model response (AC-2) or {@code null} when there
+     * was no response to preserve (AC-8's call-failure case).
+     */
+    public void markNeedsReview(UUID entryId, String rawExtractionJson) {
+        dsl.update(Entries.TABLE)
+                .set(Entries.VALIDATION_STATUS, "needs_review")
+                .set(Entries.RAW_EXTRACTION, rawExtractionJson == null ? null : JSONB.valueOf(rawExtractionJson))
+                .where(Entries.ID.eq(entryId))
+                .execute();
+    }
+
+    /** The current state of one entry, re-read after {@link ReceiptExtractionService} updates it. */
+    public Optional<Row> findById(UUID entryId) {
+        return dsl.select(Entries.ID, Entries.TS, Entries.SOURCE, Entries.VALIDATION_STATUS, Entries.PAYLOAD)
+                .from(Entries.TABLE)
+                .where(Entries.ID.eq(entryId))
+                .fetchOptional(record -> new Row(
+                        record.get(Entries.ID),
+                        record.get(Entries.TS),
+                        record.get(Entries.SOURCE),
+                        record.get(Entries.VALIDATION_STATUS),
+                        record.get(Entries.PAYLOAD).data()));
+    }
+
     /** AC-3: the entry a prior identical request already created for this idempotency key. */
     public Optional<Row> findByIdempotencyKey(UUID projectId, String idempotencyKey) {
         return dsl.select(Entries.ID, Entries.TS, Entries.SOURCE, Entries.VALIDATION_STATUS, Entries.PAYLOAD)

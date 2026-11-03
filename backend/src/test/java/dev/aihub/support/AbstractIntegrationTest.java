@@ -26,7 +26,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * let its own Ryuk reaper clean it up at JVM exit.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Import({TestJwtSupport.class, TestObjectStorageSupport.class})
+@Import({TestJwtSupport.class, TestObjectStorageSupport.class, TestChatModelSupport.class})
 public abstract class AbstractIntegrationTest {
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17-alpine");
@@ -48,11 +48,16 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected DSLContext dsl;
 
+    @Autowired
+    protected TestChatModel testChatModel;
+
     protected RestTestClient restTestClient;
 
     @BeforeEach
     void setUpRestTestClient() {
         restTestClient = RestTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        // No test's extraction-response/failure configuration survives into the next (KAN-6).
+        testChatModel.reset();
     }
 
     protected static String uniqueUserId() {

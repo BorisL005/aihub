@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FakeObjectStorageClient implements ObjectStorageClient {
 
     private final Map<String, ObjectMetadata> objects = new ConcurrentHashMap<>();
+    private final Map<String, byte[]> contents = new ConcurrentHashMap<>();
 
     @Override
     public PresignedUpload presignPut(String key, Duration ttl) {
@@ -31,12 +32,25 @@ public class FakeObjectStorageClient implements ObjectStorageClient {
     }
 
     @Override
+    public byte[] getObject(String key) {
+        byte[] content = contents.get(key);
+        return content == null ? new byte[0] : content;
+    }
+
+    @Override
     public void delete(String key) {
         objects.remove(key);
+        contents.remove(key);
     }
 
     public void putObject(String key, String contentType, long contentLength) {
         objects.put(key, new ObjectMetadata(contentType, contentLength));
+    }
+
+    /** As {@link #putObject(String, String, long)}, also seeding the bytes {@link #getObject} returns (KAN-6). */
+    public void putObject(String key, String contentType, byte[] content) {
+        objects.put(key, new ObjectMetadata(contentType, content.length));
+        contents.put(key, content);
     }
 
     public boolean exists(String key) {
