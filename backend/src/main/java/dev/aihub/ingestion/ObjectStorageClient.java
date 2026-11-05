@@ -16,6 +16,9 @@ public interface ObjectStorageClient {
     /** Metadata for the object at {@code key}, or empty if no object exists there yet. */
     Optional<ObjectMetadata> headObject(String key);
 
+    /** The raw bytes of the object at {@code key}. Only called once {@link #headObject} confirms it exists. */
+    byte[] getObject(String key);
+
     /** Deletes the object at {@code key}. A no-op if nothing exists there. */
     void delete(String key);
 }

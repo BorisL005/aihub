@@ -76,3 +76,31 @@ test('a field missing entirely from the extraction result is scored as a miss, n
   assert.equal(results.length, 1);
   assert.equal(results[0].status, 'miss');
 });
+
+test('AC-6: merchant matches case-insensitively', () => {
+  const results = compareEntry({ merchant: 'Kadoya Sushi' }, { merchant: 'KADOYA SUSHI' });
+  assert.equal(results[0].status, 'hit');
+});
+
+test('AC-6: merchant matches with leading/trailing whitespace trimmed', () => {
+  const results = compareEntry({ merchant: 'Kadoya Sushi' }, { merchant: '  Kadoya Sushi  ' });
+  assert.equal(results[0].status, 'hit');
+});
+
+test('AC-6: merchant normalization does not loosen a genuinely different name into a match', () => {
+  const results = compareEntry({ merchant: 'Kadoya Sushi' }, { merchant: 'Kadoya Sushi Bar & Grill' });
+  assert.equal(results[0].status, 'miss');
+});
+
+test('AC-6: merchant case/trim normalization does not touch the null-vs-hallucinated check — ' +
+  'null is not a string, so a non-null actual still misses even after lowercasing/trimming would ' +
+  'otherwise be attempted', () => {
+  const results = compareEntry({ merchant: null }, { merchant: 'confidently wrong restaurant inc' });
+  assert.equal(results[0].status, 'miss');
+});
+
+test('AC-6: merchant normalization is not applied to other string fields - currency stays ' +
+  'case-sensitive exact match per AC-5\'s "never a looser match" rule', () => {
+  const results = compareEntry({ currency: 'CAD' }, { currency: 'cad' });
+  assert.equal(results[0].status, 'miss');
+});

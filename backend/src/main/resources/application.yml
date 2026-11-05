@@ -4,6 +4,29 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  # The OpenAI starter autoconfigures a bean for every model type it supports (chat, embedding,
+  # image, audio speech, audio transcription, moderation), each requiring spring.ai.openai.api-key
+  # at bean-creation time regardless of whether anything calls it. This app only ever uses the
+  # chat model (dev.aihub.llm.ModelRegistry, vision extraction included - Spring AI models vision
+  # as a chat capability, not a separate model type). ARCHITECTURE.md routes transcription through
+  # Whisper/Deepgram over plain HTTP, not this starter, and embeddings/image/moderation are unused
+  # in v1. Excluding the rest means the context boots without OPENAI_API_KEY wherever nothing
+  # needs it (every test run, TestChatModelSupport's double included) instead of failing in
+  # OpenAiAudioSpeechAutoConfiguration or similar for a feature the app never exercises.
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+  ai:
+    retry:
+      # Framework 7's own @Retryable (dev.aihub.llm.ModelRegistry.call, Notes for dev on KAN-6)
+      # is the one retry layer for model calls; Spring AI's built-in retry is disabled here so
+      # the two backoff policies never stack into a much longer worst-case latency than either
+      # one alone.
+      max-attempts: 1
 
 # Auth0 issuer + audience for JWT validation (Spring Security resource server). Required in
 # every real environment; read from the AUTH0_ISSUER_URI / AUTH0_AUDIENCE env vars via Spring's
@@ -14,7 +37,21 @@ spring:
 # R2_ENDPOINT / R2_BUCKET / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY env vars via Spring's relaxed
 # binding. Left unset here on purpose - see dev.aihub.ingestion.MediaStorageConfig.
 
+# OpenAI key for extraction/answer calls (dev.aihub.llm.ModelRegistry). Required in every real
+# environment; read from the OPENAI_API_KEY env var via Spring AI's own relaxed binding
+# (spring.ai.openai.api-key). Left unset here on purpose, same as auth0.*/r2.* above.
+
 media:
   upload-url-ttl: 15m
   orphan-retention: 24h
 
+# project_types.extraction_model's logical names resolve to a concrete OpenAI model id here, not
+# in code (ARCHITECTURE.md: "Model experiments = editing a DB row" pairs with "which concrete
+# model a tier means is config"). ARCHITECTURE.md's model table names "GPT-5 Mini or Gemini Flash"
+# for vision; GPT-5 Mini is picked for v1 as the OpenAI starter is already wired. Override via
+# AIHUB_LLM_MODELS_VISION_CHEAP / AIHUB_LLM_MODELS_TEXT_CHEAP without a redeploy.
+aihub:
+  llm:
+    models:
+      vision-cheap: gpt-5-mini
+      text-cheap: gpt-5-mini

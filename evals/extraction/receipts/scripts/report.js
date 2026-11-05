@@ -25,9 +25,13 @@ function generateReport(pairResults) {
       if (misses.length === 0) {
         lines.push(`${result.id}: all fields hit`);
       } else {
-        lines.push(
-          `${result.id}: ${misses.length} field miss(es) — ${misses.map((f) => f.field).join(', ')}`
-        );
+        lines.push(`${result.id}: ${misses.length} field miss(es)`);
+        // Dumping expected vs. actual per miss (not just the field name) is what lets a
+        // diagnosis distinguish a comparator gap (case/trim/naming variation) from a genuine
+        // extraction error, instead of re-running the extractor against a guess.
+        for (const miss of misses) {
+          lines.push(`    ${miss.field}: expected=${JSON.stringify(miss.expected)} actual=${JSON.stringify(miss.actual)}`);
+        }
       }
     }
   }

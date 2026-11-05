@@ -23,6 +23,7 @@ public class EntryService {
     private final EntryRepository entryRepository;
     private final MediaUploadRepository mediaUploadRepository;
     private final ObjectStorageClient objectStorageClient;
+    private final ReceiptExtractionService receiptExtractionService;
     private final JsonMapper jsonMapper;
 
     public EntryService(
@@ -30,11 +31,13 @@ public class EntryService {
             EntryRepository entryRepository,
             MediaUploadRepository mediaUploadRepository,
             ObjectStorageClient objectStorageClient,
+            ReceiptExtractionService receiptExtractionService,
             JsonMapper jsonMapper) {
         this.projectRepository = projectRepository;
         this.entryRepository = entryRepository;
         this.mediaUploadRepository = mediaUploadRepository;
         this.objectStorageClient = objectStorageClient;
+        this.receiptExtractionService = receiptExtractionService;
         this.jsonMapper = jsonMapper;
     }
 
@@ -96,7 +99,18 @@ public class EntryService {
                 entryRepository.insertCameraEntry(projectId, request.mediaRef(), request.idempotencyKey());
         if (inserted.isPresent()) {
             mediaUploadRepository.markClaimed(request.mediaRef());
-            return new CreateEntryResult(toResponse(inserted.get()), true);
+            // AC-1/AC-2/AC-3/AC-8 (KAN-6): runs on this request's own virtual thread, inside this
+            // method's transaction - holding the DB connection for the call's duration is an
+            // accepted cost at this app's scale (ARCHITECTURE.md: minimal-cost pet project, not a
+            // high-concurrency service) rather than splitting into a second transaction, which
+            // Notes for dev does not ask for and this ticket has no load test to validate.
+            // Never throws (see its own javadoc), so a bad extraction cannot fail the capture.
+            receiptExtractionService.extract(
+                    projectId, user.userId(), inserted.get().id(), request.mediaRef(), metadata.contentType());
+            EntryRepository.Row extracted = entryRepository
+                    .findById(inserted.get().id())
+                    .orElseThrow(() -> new IllegalStateException("entry disappeared during extraction"));
+            return new CreateEntryResult(toResponse(extracted), true);
         }
         // Lost a race against an identical concurrent retry (AC-3): the winner's row is the answer.
         EntryRepository.Row winner = entryRepository

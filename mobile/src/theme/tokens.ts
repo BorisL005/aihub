@@ -22,6 +22,8 @@ export const typography = {
   body: { fontSize: 15, lineHeight: 21, fontWeight: "400" as const, letterSpacing: 0 },
   label: { fontSize: 13, lineHeight: 18, fontWeight: "400" as const, letterSpacing: 0 },
   micro: { fontSize: 11, lineHeight: 14, fontWeight: "600" as const, letterSpacing: 0.04 * 11 },
+  // DESIGN-SYSTEM.md §3: "19 / 600 / tabular - the number the user came for (KAN-6)".
+  amount: { fontSize: 19, lineHeight: 24, fontWeight: "600" as const, letterSpacing: 0 },
 } as const;
 
 export const entryRow = {

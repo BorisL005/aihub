@@ -53,4 +53,12 @@ jobs:
 
       - name: Run per-pair comparison
         working-directory: evals/extraction/receipts
+        # AC-6/AC-7 (KAN-6): wires the real OpenAI-backed extractor and gates the build on its
+        # per-field accuracy against the available verified set (2026-09-19 owner decision on
+        # KAN-6 - partial-set gate, see that ticket's Decisions section). Needs the OPENAI_API_KEY
+        # repository secret added before this job can pass; until then every pair reports
+        # "not evaluated" and the threshold gate fails loudly rather than silently passing.
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EXTRACTOR_MODULE: ./scripts/extractor-openai.js
         run: node scripts/run-eval.js .

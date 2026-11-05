@@ -28,6 +28,8 @@ public final class Tables {
         public static final Field<UUID> ID = field(name("project_types", "id"), SQLDataType.UUID);
         public static final Field<String> NAME = field(name("project_types", "name"), SQLDataType.VARCHAR);
         public static final Field<JSONB> SCHEMA = field(name("project_types", "schema"), SQLDataType.JSONB);
+        public static final Field<String> EXTRACTION_PROMPT =
+                field(name("project_types", "extraction_prompt"), SQLDataType.VARCHAR);
         public static final Field<String> EXTRACTION_MODEL =
                 field(name("project_types", "extraction_model"), SQLDataType.VARCHAR);
         public static final Field<String> ANSWER_MODEL =
@@ -64,6 +66,8 @@ public final class Tables {
         public static final Field<String> MEDIA_REF = field(name("entries", "media_ref"), SQLDataType.VARCHAR);
         public static final Field<String> IDEMPOTENCY_KEY =
                 field(name("entries", "idempotency_key"), SQLDataType.VARCHAR);
+        public static final Field<JSONB> RAW_EXTRACTION =
+                field(name("entries", "raw_extraction"), SQLDataType.JSONB);
 
         private Entries() {
         }
@@ -80,6 +84,27 @@ public final class Tables {
                 field(name("media_uploads", "claimed_at"), SQLDataType.TIMESTAMPWITHTIMEZONE);
 
         private MediaUploads() {
+        }
+    }
+
+    public static final class LlmCalls {
+
+        public static final Table<Record> TABLE = table(name("llm_calls"));
+        public static final Field<UUID> ID = field(name("llm_calls", "id"), SQLDataType.UUID);
+        public static final Field<UUID> ENTRY_ID = field(name("llm_calls", "entry_id"), SQLDataType.UUID);
+        public static final Field<String> PROMPT_VERSION =
+                field(name("llm_calls", "prompt_version"), SQLDataType.VARCHAR);
+        public static final Field<String> MODEL = field(name("llm_calls", "model"), SQLDataType.VARCHAR);
+        public static final Field<Integer> INPUT_TOKENS =
+                field(name("llm_calls", "input_tokens"), SQLDataType.INTEGER);
+        public static final Field<Integer> OUTPUT_TOKENS =
+                field(name("llm_calls", "output_tokens"), SQLDataType.INTEGER);
+        public static final Field<Integer> LATENCY_MS =
+                field(name("llm_calls", "latency_ms"), SQLDataType.INTEGER);
+        public static final Field<String> VALIDATION_OUTCOME =
+                field(name("llm_calls", "validation_outcome"), SQLDataType.VARCHAR);
+
+        private LlmCalls() {
         }
     }
 }

@@ -25,8 +25,25 @@ import org.testcontainers.containers.PostgreSQLContainer;
  * documented "singleton container" pattern instead - start it once in a static initializer and
  * let its own Ryuk reaper clean it up at JVM exit.
  */
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Import({TestJwtSupport.class, TestObjectStorageSupport.class})
+// spring.autoconfigure.exclude repeats application.yml's OpenAI-starter exclusions (list-valued
+// properties replace rather than merge across sources, so a test-only addition here would
+// otherwise drop the main ones) plus OpenAiChatAutoConfiguration. That one is NOT excluded in
+// application.yml (production needs the real chat model) but must be here: its
+// @ConditionalOnMissingBean has no explicit type argument, so Spring Boot infers the target from
+// the bean method's declared return type - the concrete OpenAiChatModel, not the ChatModel
+// interface TestChatModelSupport.chatModel() returns - so it never actually backs off for an
+// interface-typed override and still tries (and fails) to build a real OpenAI client without
+// credentials.
+@SpringBootTest(
+        webEnvironment = WebEnvironment.RANDOM_PORT,
+        properties = "spring.autoconfigure.exclude="
+                + "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration,"
+                + "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration,"
+                + "org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration,"
+                + "org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration,"
+                + "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration,"
+                + "org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration")
+@Import({TestJwtSupport.class, TestObjectStorageSupport.class, TestChatModelSupport.class})
 public abstract class AbstractIntegrationTest {
 
     static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17-alpine");
@@ -48,11 +65,16 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected DSLContext dsl;
 
+    @Autowired
+    protected TestChatModel testChatModel;
+
     protected RestTestClient restTestClient;
 
     @BeforeEach
     void setUpRestTestClient() {
         restTestClient = RestTestClient.bindToServer().baseUrl("http://localhost:" + port).build();
+        // No test's extraction-response/failure configuration survives into the next (KAN-6).
+        testChatModel.reset();
     }
 
     protected static String uniqueUserId() {
