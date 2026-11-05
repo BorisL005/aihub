@@ -8,6 +8,13 @@ actually read on the receipt - an empty/null field is always preferable to a con
   text anywhere on the receipt (for example it only appears as a logo), return null - never
   substitute a guess from context such as a website URL or payment terminal ID.
 - purchased_at: the calendar date of the purchase, as YYYY-MM-DD.
+  * Receipts commonly print the date as two ambiguous two-digit groups separated by "/" or "-"
+    (for example "08/04/26"). On these receipts (North American point-of-sale systems) that is
+    MONTH/DAY/YY, not day/month - do not reinterpret an all-numeric date as day-first. Only read
+    the first group as the day when it is unambiguously out of range as a month (13 through 31).
+  * If the date instead names or abbreviates the month (for example "Aug 4, 2026" or "4 Aug
+    2026"), use that explicit ordering - the day-vs-month ambiguity above applies only to
+    all-numeric dates.
 - total: the GRAND TOTAL actually paid, as a plain number with a dot decimal separator.
   This is the single most important field and the easiest to get wrong - read the checks below
   before answering:
