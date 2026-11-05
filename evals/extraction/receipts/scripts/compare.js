@@ -32,6 +32,18 @@ function deepEqual(a, b) {
   return false;
 }
 
+// AC-6's own text sets a looser bar for merchant specifically ("case-insensitive trimmed
+// match") than every other field gets - total/currency/purchased_at/line_items all go through
+// deepEqual's strict comparison (AC-5: "never a looser close-enough match"). Applying that
+// loosening ONLY to merchant, and only when both sides are strings, keeps the null-vs-hallucinated
+// check (AC-6, pair 019) exact: null is not a string, so it still falls through to deepEqual.
+function merchantEqual(expectedValue, actualValue) {
+  if (typeof expectedValue !== 'string' || typeof actualValue !== 'string') {
+    return deepEqual(expectedValue, actualValue);
+  }
+  return expectedValue.trim().toLowerCase() === actualValue.trim().toLowerCase();
+}
+
 // Compares one extracted entry against one expected fixture object.
 // `_`-prefixed keys in `expected` are annotation metadata (README convention)
 // and are excluded from comparison. `actual` field values are compared with
@@ -39,7 +51,8 @@ function deepEqual(a, b) {
 // looser "close enough" match) — this is what keeps a subtotal/pre-tip
 // figure from ever being scored as a match against a grand-total field
 // (AC-5), and keeps a non-null hallucinated value from ever being scored as
-// a match against an expected `null` (AC-6).
+// a match against an expected `null` (AC-6) - except `merchant`, which AC-6
+// explicitly grades case-insensitive and trimmed (see merchantEqual above).
 // Returns { field, status: 'hit' | 'miss', expected, actual }[]
 function compareEntry(expected, actual) {
   const results = [];
@@ -47,15 +60,18 @@ function compareEntry(expected, actual) {
     if (isAnnotationKey(key)) continue;
     const expectedValue = expected[key];
     const actualValue = actual ? actual[key] : undefined;
-    const hit = deepEqual(expectedValue, actualValue === undefined ? null : actualValue);
+    const normalizedActual = actualValue === undefined ? null : actualValue;
+    const hit = key === 'merchant'
+      ? merchantEqual(expectedValue, normalizedActual)
+      : deepEqual(expectedValue, normalizedActual);
     results.push({
       field: key,
       status: hit ? 'hit' : 'miss',
       expected: expectedValue,
-      actual: actualValue === undefined ? null : actualValue,
+      actual: normalizedActual,
     });
   }
   return results;
 }
 
-module.exports = { compareEntry, deepEqual, isAnnotationKey, NUMERIC_EPSILON };
+module.exports = { compareEntry, deepEqual, merchantEqual, isAnnotationKey, NUMERIC_EPSILON };
